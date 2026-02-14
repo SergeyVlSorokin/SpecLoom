@@ -1,0 +1,68 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Product Context",
+    "description": "High-level strategic context including scope, perspective, and environment.",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Unique identifier for this context document (e.g., 'CTX-001')"
+        },
+        "product_perspective": {
+            "type": "string",
+            "description": "Describes the relationship of the product to other products or if it is independent."
+        },
+        "product_scope": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "A brief summary of what the product will do."
+                },
+                "in_scope": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of features or characteristics that ARE included."
+                },
+                "out_of_scope": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of features or characteristics that are explicitly EXCLUDED."
+                }
+            },
+            "required": ["description", "in_scope"]
+        },
+        "operating_environment": {
+            "type": "string",
+            "description": "Description of the environment in which the software will operate (hardware, OS, etc.)."
+        },
+        "references": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string" },
+                    "title": { "type": "string" },
+                    "url": { "type": "string" }
+                },
+                "required": ["title"]
+            }
+        },
+        "definitions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "term": { "type": "string" },
+                    "definition": { "type": "string" }
+                },
+                "required": ["term", "definition"]
+            }
+        }
+    },
+    "required": ["id", "product_perspective", "product_scope"]
+}

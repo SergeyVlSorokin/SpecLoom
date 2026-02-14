@@ -1,0 +1,22 @@
+{
+  "routine": "Feature",
+  "verification_regime": "Automated",
+  "execution_steps": [
+    "Run 'loom start <task_id>' to lock active context",
+    "Run 'loom context <task_id>' to ingest requirements",
+    "Create/Update Test File (Red Phase)",
+    "Implement Code in src/ (Green Phase) - MUST add @trace <task_id>",
+    "Run Tests to verify (Refactor Phase)",
+    "Run 'loom complete <task_id>'"
+  ],
+  "definition_of_done": [
+    "Tests pass",
+    "All modified source files have @trace annotation",
+    "loom validate passes (No Ghost Code)"
+  ],
+  "tdd_cycle": {
+    "test_file": "tests/path/to/test.ts",
+    "implementation_file": "src/path/to/file.ts",
+    "verification_command": "npm test"
+  }
+}

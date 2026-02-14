@@ -1,0 +1,16 @@
+{
+  "routine": "Design",
+  "execution_steps": [
+    "Run 'loom impact <target_artifact_id>' to assess risk",
+    "Run 'loom context <target_artifact_id> --depth=down' to load dependencies",
+    "Modify JSON artifacts in .spec/data/",
+    "Run 'loom sync' to update Graph DB",
+    "Run 'loom validate' to check for orphans",
+    "Run 'loom complete <task_id>'"
+  ],
+  "definition_of_done": [
+    "Artifacts updated in Registry",
+    "Graph Database is synced",
+    "No broken links or orphans introduced"
+  ]
+}

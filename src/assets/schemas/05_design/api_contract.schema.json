@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "API Interface Meta-schema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^API-[0-9]{3}$" },
+    "specification": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["OpenAPI", "AsyncAPI", "GraphQL", "CLI"] },
+        "version": { "type": "string" },
+        "path": { "type": "string", "description": "Path to the actual .yaml/.graphql file" }
+      },
+      "required": ["type", "path"]
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "functional_requirements": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "required": ["id", "specification", "trace_to"]
+}

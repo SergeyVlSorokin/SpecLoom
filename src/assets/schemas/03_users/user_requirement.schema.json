@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "User Requirement",
+    "type": "object",
+    "properties": {
+        "id": {"type": "string", "pattern": "^UR-[0-9]{3}$"},
+        "user_role": {"type": "string"},
+        "story": {"type": "string", "description": "As a... I want to... So that..."},
+        "trace_to": {
+            "type": "object",
+            "properties": {
+                "business_goals": {"type": "array", "items": {"type": "string"}},
+                "stakeholders": {"type": "array", "items": {"type": "string"}}
+            }
+        },
+        "acceptance_criteria": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "description": "Conditions that must be met for the user to accept the requirement."
+        },
+        "priority": {"enum": ["High", "Medium", "Low"]}
+    },
+    "required": ["id", "user_role", "story", "acceptance_criteria"]
+}

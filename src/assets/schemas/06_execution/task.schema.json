@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Execution Task Specification",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^TASK-[0-9]{3,4}$" },
+    "parent_task_id": { "type": "string", "description": "For hierarchical task slicing." },
+    "title": { "type": "string" },
+    "type": { "enum": ["Scaffold", "Feature", "Refactor", "Test", "Doc", "Bugfix", "Plan", "Process"] },
+    "routine": { 
+      "enum": ["Feature", "Design", "Process", "Manual"],
+      "description": "The mandatory operating procedure to follow (enforces specific DoD and commands)."
+    },
+    "objective": { "type": "string" },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "requirements": { "type": "array", "items": { "type": "string" } },
+        "system_requirements": { "type": "array", "items": { "type": "string", "pattern": "^SYS-[A-Z]+$" } },
+        "design_nodes": { "type": "array", "items": { "type": "string" } }
+      },
+      "minProperties": 1
+    },
+    "tdd_cycle": {
+      "type": "object",
+      "properties": {
+        "test_file": { "type": "string" },
+        "implementation_file": { "type": "string" },
+        "verification_command": { "type": "string" }
+      },
+      "description": "Required for Feature/Refactor/Bugfix types."
+    },
+    "compliance": {
+      "type": "object",
+      "properties": {
+        "strict_trace": { "type": "boolean", "default": true, "description": "If true, code MUST contain @trace annotations for all linked requirements." }
+      },
+      "default": { "strict_trace": true }
+    },
+    "ai_instructions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Specific procedural instructions for the AI Agent (e.g., 'Ask user for X', 'Run command Y')."
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^TASK-[0-9]{3,4}$" },
+      "description": "List of Task IDs that must be 'Done' or 'Verified' before this task can start."
+    },
+    "priority": {
+      "type": "integer",
+      "default": 0,
+      "description": "Higher number means higher priority for execution when unblocked."
+    },
+    "verification_regime": {
+      "type": "string",
+      "enum": ["Automated", "Manual", "Hybrid"],
+      "default": "Automated",
+      "description": "Required verification mode: Automated (Tests), Manual (Human Sign-off), or Hybrid (Both)."
+    },
+    "gate_dependency": {
+      "type": "string",
+      "enum": ["None", "Spec_Freeze", "Impl_Freeze"],
+      "default": "None",
+      "description": "The strict gate that must be closed before this task can start."
+    },
+    "execution_steps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "The atomic, sequential steps required to complete this task (e.g., 'Write Test', 'Fail', 'Implement')."
+    },
+    "definition_of_done": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status": {
+      "enum": ["Pending", "In Progress", "Review", "Done", "Blocked", "Verified"],
+      "default": "Pending"
+    },
+    "context": {
+       "type": "object",
+       "properties": {
+           "relevant_files": { "type": "array", "items": { "type": "string" } }
+       }
+    }
+  },
+  "required": ["id", "title", "type", "trace_to", "status", "execution_steps", "definition_of_done"]
+}

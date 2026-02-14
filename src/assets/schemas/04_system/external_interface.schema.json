@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "External Interface Specification",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^EI-[0-9]{3}$" },
+    "type": {
+      "enum": ["User", "Hardware", "Software", "Communication"],
+      "description": "User (UI/UX), Hardware (Sensors/IO), Software (External APIs), Comm (Protocols/Bus)"
+    },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "protocol_details": {
+      "type": "object",
+      "properties": {
+        "standard": { "type": "string", "placeholder": "e.g., REST, MQTT, SPI" },
+        "data_format": { "type": "string", "placeholder": "e.g., JSON, Protobuf" }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Links to other requirements or third-party docs."
+    }
+  },
+  "required": ["id", "type", "name", "description"]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Template Manifest Specification",
+  "type": "object",
+  "properties": {
+    "target_doc": { "type": "string", "description": "e.g., FULL_SRS.md" },
+    "layout": { "type": "string", "description": "Path to the main layout file" },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_type": { "enum": ["FR", "UR", "AS", "CON", "API", "DATA"] },
+          "template_path": { "type": "string" },
+          "output_mode": { "enum": ["Inject", "Standalone", "Both"] }
+        }
+      }
+    }
+  },
+  "required": ["target_doc", "mappings"]
+}

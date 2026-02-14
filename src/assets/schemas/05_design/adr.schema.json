@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Architecture Decision Record (ADR)",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^ADR-[0-9]{3}$" },
+    "title": { "type": "string" },
+    "status": { "enum": ["Draft", "Proposed", "Accepted", "Rejected", "Deprecated"] },
+    "context": { 
+      "type": "string",
+      "description": "What is the issue that we are seeing that is motivating this decision or change?"
+    },
+    "decision": {
+      "type": "string",
+      "description": "What is the change that we are proposing and/or doing?"
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "pros": { "type": "array", "items": { "type": "string" } },
+          "cons": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["name", "description"]
+      }
+    },
+    "consequences": {
+      "type": "object",
+      "properties": {
+        "positive": { "type": "array", "items": { "type": "string" } },
+        "negative": { "type": "array", "items": { "type": "string" } },
+        "neutral": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["positive", "negative"]
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "user_requirements": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "stakeholders": { "type": "array", "items": { "type": "string" } },
+        "affected_design_nodes": { 
+            "type": "array", 
+            "items": { "type": "string" },
+            "description": "Links to VIEW-XXX, API-XXX, or DATA-XXX nodes."
+        }
+      },
+      "required": ["stakeholders"]
+    }
+  },
+  "required": ["id", "title", "status", "context", "decision", "consequences", "trace_to"]
+}

@@ -1,0 +1,13 @@
+{
+  "routine": "Process",
+  "execution_steps": [
+    "Run 'loom init' (if applicable)",
+    "Execute sub-tasks",
+    "Run 'loom validate'",
+    "Run 'loom complete <task_id>'"
+  ],
+  "definition_of_done": [
+    "Process goal achieved",
+    "System state is valid"
+  ]
+}

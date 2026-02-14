@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://specloom.io/schemas/06_execution/test_scenario.schema.json",
+  "title": "Test Scenario (V&V)",
+  "description": "A formal verification scenario (Integration or Acceptance Test) validating that a requirement is met.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SCN-[0-9]{3}$",
+      "description": "Unique identifier (e.g., SCN-001)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short name of the scenario"
+    },
+    "objective": {
+      "type": "string",
+      "description": "What this scenario validates"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["Manual", "Automated"],
+      "default": "Manual"
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of FR/UR/NFR IDs being validated"
+        }
+      },
+      "required": ["requirements"]
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": { "type": "string" },
+          "expected_result": { "type": "string" }
+        },
+        "required": ["step", "expected_result"]
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Draft", "Active", "Deprecated"],
+      "default": "Draft"
+    },
+    "last_run": {
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date-time" },
+        "result": { "type": "string", "enum": ["Pass", "Fail", "Skipped"] },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "required": ["id", "title", "trace_to", "steps"]
+}

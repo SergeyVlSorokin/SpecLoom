@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Functional Requirement",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier, e.g., FR-001"
+    },
+    "title": { "type": "string" },
+    "description": {
+      "type": "string",
+      "description": "The 'System shall...' statement."
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "user_requirements": { 
+            "type": "array", 
+            "items": { "type": "string" },
+            "description": "IDs of parent URs" 
+        },
+        "stakeholders": { "type": "array", "items": { "type": "string" } },
+        "assumptions": { "type": "array", "items": { "type": "string" } },
+        "business_rules": { "type": "array", "items": { "type": "string" } },
+        "nfrs": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "design_nodes": { 
+            "type": "array", 
+            "items": { "type": "string" },
+            "description": "IDs of architectural components (VIEW-*, API-*, DATA-*) that implement this FR. MANDATORY for Design phase." 
+        },
+        "verification_plans": {
+             "type": "array",
+             "items": { "type": "string" },
+             "description": "IDs of Test Scenarios (SCN-*) or Verification Tasks (TASK-*). MANDATORY for Verification phase."
+        }
+      },
+      "minProperties": 1,
+      "required": ["design_nodes", "verification_plans"]
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Conditions that must be met for the requirement to be marked as complete."
+    },
+    "verification_method": {
+      "enum": ["Analysis", "Demonstration", "Inspection", "Test"],
+      "default": "Test"
+    },
+    "priority": { "enum": ["Must-have", "Should-have", "Could-have"] },
+    "stability": { 
+      "enum": ["Stable", "Draft", "TBD"],
+      "description": "Used to signal to the agent if the requirement is ready for implementation."
+    }
+  },
+  "required": ["id", "title", "description", "trace_to", "acceptance_criteria", "priority", "stability"]
+}

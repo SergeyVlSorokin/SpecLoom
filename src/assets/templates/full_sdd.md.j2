@@ -1,0 +1,66 @@
+# Software Design Document (SDD)
+
+## 1. Architecture Decisions (ADR)
+{% for adr in adrs %}
+### {{ adr.id }}: {{ adr.title }}
+*   **Status:** {{ adr.status }}
+*   **Context:** {{ adr.context }}
+*   **Decision:** {{ adr.decision }}
+*   **Alternatives:**
+    {% for alt in adr.alternatives %}
+    - **{{ alt.name }}:** {{ alt.description }}
+    {% endfor %}
+*   **Consequences:**
+    - Positive: {{ adr.consequences.positive | join(", ") }}
+    - Negative: {{ adr.consequences.negative | join(", ") }}
+{% endfor %}
+
+---
+
+## 2. Architectural Views (4+1)
+{% for view in views %}
+### {{ view.id }}: {{ view.name }} ({{ view.viewpoint }})
+**Concerns:** {{ view.concerns | join(", ") }}
+
+**Elements:**
+{% for el in view.elements %}
+*   **{{ el.name }}** ({{ el.type }}): {{ el.description }}
+{% endfor %}
+
+**Diagram Source:**
+```mermaid
+{{ view.diagram_source }}
+```
+{% endfor %}
+
+---
+
+## 3. Data Models
+{% for model in data_models %}
+### {{ model.id }}: {{ model.name }}
+{{ model.description }}
+
+**Entities:**
+{% for ent in model.entities %}
+*   **{{ ent.name }}:** {{ ent.description }}
+    - Attributes:
+    {% for attr in ent.attributes %}
+        - `{{ attr.name }}` ({{ attr.type }})
+    {% endfor %}
+{% endfor %}
+{% endfor %}
+
+---
+
+## 4. API Contracts
+{% for api in apis %}
+### {{ api.id }}: {{ api.name }}
+{{ api.description }}
+
+**Endpoints/Commands:**
+{% for ep in api.endpoints %}
+#### `{{ ep.path }}` ({{ ep.method }})
+{{ ep.description }}
+*   Parameters: {{ ep.parameters | tojson }}
+{% endfor %}
+{% endfor %}

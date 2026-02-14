@@ -1,0 +1,57 @@
+# Software Requirements Specification (SRS)
+
+## 1. Product Context
+**Product:** {{ product_context.product_scope.description }}
+**Perspective:** {{ product_context.product_perspective }}
+
+### Definitions
+{% for d in product_context.definitions %}
+*   **{{ d.term }}:** {{ d.definition }}
+{% endfor %}
+
+---
+
+## 2. Stakeholders
+{% for s in stakeholders %}
+### {{ s.id }}: {{ s.role }}
+*   **Concern:** {{ s.concern }}
+{% endfor %}
+
+---
+
+## 3. Requirements
+
+### 3.1 User Requirements
+{% for ur in user_requirements %}
+*   **{{ ur.id }}:** As a **{{ ur.user_role }}**, I want **{{ ur.story }}**
+    *   *Trace:* {{ ur.trace_to | tojson }}
+{% endfor %}
+
+### 3.2 Functional Requirements
+{% for fr in functional_requirements %}
+#### {{ fr.id }}: {{ fr.title }}
+{{ fr.description }}
+*   **Priority:** {{ fr.priority }}
+*   **Acceptance Criteria:**
+    {% for ac in fr.acceptance_criteria %}
+    - {{ ac }}
+    {% endfor %}
+*   **Trace:** {{ fr.trace_to | tojson }}
+{% endfor %}
+
+### 3.3 Non-Functional Requirements
+{% for nfr in non_functional_requirements %}
+#### {{ nfr.id }}: {{ nfr.title }} ({{ nfr.category }})
+{{ nfr.description }}
+*   **Criteria:** {{ nfr.acceptance_criteria | tojson }}
+{% endfor %}
+
+### 3.4 Constraints
+{% for c in constraints %}
+*   **{{ c.id }}:** {{ c.statement }} ({{ c.category }})
+{% endfor %}
+
+### 3.5 Assumptions
+{% for a in assumptions %}
+*   **{{ a.id }}:** {{ a.statement }}
+{% endfor %}

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "System Meta-Requirement",
+  "description": "Defines a high-level phase or constraint of the System V-Model Process.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SYS-[A-Z]+$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["Define", "Implement", "Verify"]
+    }
+  },
+  "required": ["id", "title", "description", "phase"]
+}

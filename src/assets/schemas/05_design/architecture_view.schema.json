@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Architecture View (4+1)",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^VIEW-[0-9]{3}$" },
+    "name": { "type": "string" },
+    "viewpoint": {
+      "enum": ["Logical", "Process", "Physical", "Development", "Scenarios"],
+      "description": "Logical (Functionality), Process (Concurrency/Runtime), Physical (Deployment/Topology), Development (Packages/Modules), Scenarios (Use Cases/Traceability)."
+    },
+    "concerns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What problems does this view solve? (e.g., Scalability, Concurrency, Modularity)."
+    },
+    "diagram_source": {
+        "type": "string",
+        "description": "Mermaid JS or PlantUML source code representing the view."
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "placeholder": "e.g., Module, Class, Service, Node, Component" },
+          "description": { "type": "string" },
+          "trace_refs": {
+             "type": "array", 
+             "items": { "type": "string" },
+             "description": "Links to specific FR-XXX or ADR-XXX"
+          }
+        },
+        "required": ["name", "type"]
+      }
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "functional_requirements": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "nfrs": { "type": "array", "items": { "type": "string" } },
+        "adrs": { "type": "array", "items": { "type": "string" } }
+      },
+      "minProperties": 1
+    }
+  },
+  "required": ["id", "name", "viewpoint", "diagram_source", "trace_to"]
+}

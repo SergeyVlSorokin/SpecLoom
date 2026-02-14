@@ -1,0 +1,15 @@
+.spec/
+src/
+tests/
+tmp/
+.git/
+.gitignore
+.specloomignore
+tsconfig.json
+jest.config.cjs
+GUIDE.md
+investigate_orphans.ts
+query_db.cjs
+query_fr.cjs
+check.md
+.npmrc

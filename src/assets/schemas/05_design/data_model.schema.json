@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Data Model Meta-schema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^DATA-[0-9]{3}$" },
+    "specification": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["ODCS", "SQL_DDL"] },
+        "path": { "type": "string" }
+      },
+      "required": ["type", "path"]
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "functional_requirements": { "type": "array", "items": { "type": "string" } },
+        "assumptions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "required": ["id", "specification", "trace_to"]
+}

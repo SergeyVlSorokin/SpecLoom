@@ -1,0 +1,53 @@
+{
+  "name": "specloom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "rm -rf dist && tsc && cp -r src/assets dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpruntov/SpecLoom.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "loom": "./dist/src/adapters/cli/index.js",
+    "loom-server": "./dist/src/adapters/mcp/server.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "bugs": {
+    "url": "https://github.com/kpruntov/SpecLoom/issues"
+  },
+  "homepage": "https://github.com/kpruntov/SpecLoom#readme",
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/commander": "^2.12.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.2.0",
+    "@types/pdf-parse": "^1.1.5",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "better-sqlite3": "^12.6.2",
+    "commander": "^14.0.3",
+    "globby": "^16.1.0",
+    "ignore": "^7.0.5",
+    "pdf-parse": "^2.4.5",
+    "simple-git": "^3.30.0"
+  }
+}

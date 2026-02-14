@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Business Rule",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier, e.g., BR-001",
+      "pattern": "^BR-[0-9]{3}$"
+    },
+    "title": { "type": "string" },
+    "statement": {
+      "type": "string",
+      "description": "The specific policy or rule."
+    },
+    "source": {
+      "type": "string",
+      "description": "Origin of the rule (e.g., 'GDPR Art. 12', 'Corporate Security Policy')"
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "stakeholders": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "required": ["id", "title", "statement", "source"]
+}

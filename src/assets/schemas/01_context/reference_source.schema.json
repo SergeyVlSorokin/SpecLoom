@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Reference Source Artifact",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^REF-[0-9]{3}$" },
+    "type": { "const": "reference_source" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "source_path": { "type": "string", "description": "Original path or URL" },
+    "local_path": { "type": "string", "description": "Relative path in .spec/attachments/" },
+    "format": { "type": "string", "enum": ["PDF", "Markdown", "Image", "Text", "Other"] },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "stakeholders": { "type": "array", "items": { "type": "string" } },
+        "user_requirements": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "required": ["id", "title", "type", "local_path", "format"]
+}

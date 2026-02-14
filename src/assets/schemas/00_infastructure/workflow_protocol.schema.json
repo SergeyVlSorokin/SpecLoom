@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Workflow Protocol Specification",
+  "type": "object",
+  "properties": {
+    "current_stage": { "enum": ["Context_Definition", "SRS_Drafting", "SDD_Design", "Task_Planning", "Execution"] },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": { "type": "string" },
+          "required_artifacts": { "type": "array", "items": { "type": "string" } },
+          "human_signoff_required": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "statement": {
+            "type": "string"
+        },
+        "rationale": {
+            "type": "string"
+        },
+        "affected_nodes": {
+            "type": "array",
+            "description": "IDs of requirements or design nodes this pivot affects",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "id",
+        "statement",
+        "affected_nodes"
+    ]
+}
