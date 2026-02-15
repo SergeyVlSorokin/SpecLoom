@@ -21,12 +21,13 @@ export interface ScenarioResult {
 export class ScenarioRunner {
     constructor(
         private db: GraphDatabase,
-        private ui: UserInterface
+        private ui: UserInterface,
+        private interactive: boolean = true
     ) {}
 
     public async run(id: string): Promise<ScenarioResult> {
         const node = this.db.getNode(id);
-        if (!node || node.type !== NodeType.VERIFICATION) {
+        if (!node || node.type !== NodeType.TEST_SCENARIO) {
             throw new Error(`Scenario ${id} not found or invalid type.`);
         }
 
@@ -38,19 +39,28 @@ export class ScenarioRunner {
             this.ui.info(`\nStep ${index + 1}: ${step.step}`);
             this.ui.info(`Expected: ${step.expected_result}`);
             
-            const response = await this.ui.ask('Did this step pass? (y/n/skip) ');
-            
-            if (response.toLowerCase().startsWith('n')) {
-                this.ui.error('Step Failed.');
-                return { status: 'FAIL', stepsCompleted };
-            }
-            
-            if (response.toLowerCase().startsWith('s')) {
-                this.ui.info('Step Skipped.');
-                return { status: 'SKIPPED', stepsCompleted };
+            if (this.interactive) {
+                const response = await this.ui.ask('Did this step pass? (y/n/skip) ');
+                
+                if (response.toLowerCase().startsWith('n')) {
+                    this.ui.error('Step Failed.');
+                    return { status: 'FAIL', stepsCompleted };
+                }
+                
+                if (response.toLowerCase().startsWith('s')) {
+                    this.ui.info('Step Skipped.');
+                    return { status: 'SKIPPED', stepsCompleted };
+                }
+            } else {
+                this.ui.info('[Non-Interactive] Step requires manual verification.');
             }
 
             stepsCompleted++;
+        }
+
+        if (!this.interactive) {
+            this.ui.info('Scenario execution finished (Non-Interactive).');
+            return { status: 'SKIPPED', stepsCompleted, notes: 'Non-interactive mode: Steps listed for external verification.' };
         }
 
         this.ui.success('Scenario Passed!');

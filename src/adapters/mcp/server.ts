@@ -74,7 +74,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'loom_verify',
-        description: 'Execute a verification scenario (Note: Fails on interactive steps)',
+        description: 'Execute a verification scenario (Non-Interactive: Returns steps for agent to verify)',
         inputSchema: {
           type: 'object',
           properties: {
@@ -85,19 +85,65 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'loom_context',
-        description: 'Get a focused subgraph around a node. For Tasks, use loom_bundle.',
+        description: 'Get focused context. If ID is a Task, returns Execution Bundle. If ID is a Node, returns Graph Slice.',
         inputSchema: {
           type: 'object',
           properties: {
-            node: { type: 'string', description: 'Center Node ID' },
-            depth: { type: 'string', description: 'Depth of traversal (default: 1)' }
+            id: { type: 'string', description: 'Artifact ID (Task or Node)' },
+            depth: { type: 'string', description: 'Depth of slice (default: 1)' }
           },
-          required: ['node']
+          required: ['id']
         },
       },
       {
+        name: 'loom_init',
+        description: 'Initialize SpecLoom in the current directory',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                brownfield: { type: 'string', description: 'Path to existing source code' },
+                greenfield: { type: 'boolean', description: 'Start a new project from scratch' }
+            }
+        }
+      },
+      {
+        name: 'loom_import',
+        description: 'Import an external reference file',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                file: { type: 'string', description: 'Path to file' },
+                id: { type: 'string', description: 'Reference ID (REF-XXX)' },
+                title: { type: 'string', description: 'Title' }
+            },
+            required: ['file', 'id']
+        }
+      },
+      {
+        name: 'loom_update_task',
+        description: 'Update the status of a task manually',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                id: { type: 'string', description: 'Task ID' },
+                status: { type: 'string', enum: ['Pending', 'In Progress', 'Done', 'Verified'] }
+            },
+            required: ['id', 'status']
+        }
+      },
+      {
+        name: 'loom_generate',
+        description: 'Generate SRS/SDD documents',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                out: { type: 'string', description: 'Output directory' }
+            }
+        }
+      },
+      {
         name: 'loom_bundle',
-        description: 'Get execution context bundle for a task',
+        description: 'Get execution context bundle for a task (Explicit)',
         inputSchema: {
           type: 'object',
           properties: {
@@ -198,10 +244,44 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === 'loom_context') {
-        const node = args?.node as string;
-        const depth = args?.depth ? parseInt(args.depth as string) : 1;
-        const result = await controller.getContext(node, depth);
-        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        const id = (args?.id as string) || (args?.node as string); // Backwards compat attempt
+        if (!id) throw new Error("Missing 'id' parameter");
+
+        if (id.startsWith('TASK-')) {
+             const result = await controller.getContextBundle(id);
+             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        } else {
+             const depth = args?.depth ? parseInt(args.depth as string) : 1;
+             const result = await controller.getContext(id, depth);
+             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+    }
+
+    if (name === 'loom_init') {
+        const result = controller.init(args?.brownfield as string);
+        return { content: [{ type: 'text', text: result.message }] };
+    }
+
+    if (name === 'loom_import') {
+        const result = await controller.importReference(
+            args?.file as string,
+            args?.id as string,
+            args?.title as string
+        );
+        return { content: [{ type: 'text', text: result.message }] };
+    }
+
+    if (name === 'loom_update_task') {
+        const result = await controller.updateTaskStatus(
+            args?.id as string,
+            args?.status as string
+        );
+        return { content: [{ type: 'text', text: result.message }] };
+    }
+
+    if (name === 'loom_generate') {
+        const result = await controller.generateDocs(args?.out as string);
+        return { content: [{ type: 'text', text: result.message }] };
     }
 
     if (name === 'loom_sync') {
@@ -219,30 +299,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === 'loom_next') {
-      const task = await controller.getNextTask();
-      if (!task) return { content: [{ type: 'text', text: 'All tasks completed.' }] };
-      return { content: [{ type: 'text', text: JSON.stringify(task, null, 2) }] };
+      const result = await controller.getNextTask();
+      if (result.status === 'done') return { content: [{ type: 'text', text: 'All tasks completed.' }] };
+      if (result.status === 'blocked') return { content: [{ type: 'text', text: `No actionable tasks. ${result.blockedCount} blocked.` }] };
+      return { content: [{ type: 'text', text: JSON.stringify(result.task, null, 2) }] };
     }
 
     if (name === 'loom_verify') {
       const id = args?.id as string;
       if (!id) throw new Error('Missing id parameter');
       
+      const logs: string[] = [];
       const mcpUi = {
           ask: async (q: string) => { throw new Error(`Interactive prompt not supported in MCP yet: ${q}`); },
-          info: (msg: string) => {}, // Silent info
-          error: (msg: string) => {},
-          success: (msg: string) => {}
+          info: (msg: string) => { logs.push(msg); },
+          error: (msg: string) => { logs.push(`ERROR: ${msg}`); },
+          success: (msg: string) => { logs.push(`SUCCESS: ${msg}`); }
       };
       
       try {
-          const result = await controller.runScenario(id, mcpUi);
+          const result = await controller.runScenario(id, mcpUi, false);
           return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            content: [{ type: 'text', text: JSON.stringify({ ...result, logs }, null, 2) }],
             isError: result.status === 'FAIL'
           };
       } catch (e: any) {
-          return { content: [{ type: 'text', text: `Scenario Error: ${e.message}` }], isError: true };
+          return { content: [{ type: 'text', text: `Scenario Error: ${e.message}\nLogs:\n${logs.join('\n')}` }], isError: true };
       }
     }
 

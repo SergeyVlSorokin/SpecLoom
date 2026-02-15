@@ -105,10 +105,16 @@ program
   .description('Get the next pending task from the plan')
   .action(async () => {
     try {
-      const task = await controller.getNextTask();
-      if (!task) {
+      const result = await controller.getNextTask();
+      
+      if (result.status === 'done') {
         console.log('All tasks completed! The plan is fulfilled.');
+      } else if (result.status === 'blocked') {
+        console.log(`\n>>> NO ACTIONABLE TASKS <<<`);
+        console.log(`There are ${result.blockedCount} pending tasks, but they are all blocked by dependencies.`);
+        console.log('Check "loom status" or review dependencies.');
       } else {
+        const task = result.task;
         console.log(`\n>>> NEXT OBJECTIVE: ${task.id} <<<`);
         console.log(`Title: ${task.title}`);
         console.log(`Type: ${task.type}`);
@@ -150,6 +156,12 @@ program
           console.log('\n--- MANDATORY PROTOCOLS ---');
           console.log(info.instruction);
           console.log(`  Path: ${info.mandatory_protocols_path}`);
+      }
+
+      if (info.templates) {
+          console.log('\n--- TEMPLATES ---');
+          console.log(`  Path: ${info.templates.tasks_path}`);
+          console.log(`  Available: ${info.templates.available.join(', ')}`);
       }
       
       controller.dispose();

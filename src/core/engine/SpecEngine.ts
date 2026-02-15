@@ -10,6 +10,13 @@ import { SpecNode, NodeType } from '../domain/SpecNode.js';
 import { readFileSync, writeFileSync } from 'fs';
 import { join, basename } from 'path';
 
+export interface NextTaskResult {
+    status: 'task' | 'done' | 'blocked';
+    task?: any;
+    blockedCount: number;
+    pendingCount: number;
+}
+
 /**
  * Orchestrates the synchronization and validation of the specification.
  * @trace FR-009 (Traceability)
@@ -218,7 +225,7 @@ export class SpecEngine {
     };
   }
 
-  public getPendingTasks() {
+  public getPendingTasks(): NextTaskResult {
     // Fetch all execution tasks to build dependency graph
     const stmt = this.db['db'].prepare("SELECT * FROM nodes WHERE type = 'execution_task'");
     const rows = stmt.all() as any[];
@@ -233,11 +240,15 @@ export class SpecEngine {
         statusMap.set(task.id, task.status);
     }
 
-    const unblockedTasks = allTasks.filter(task => {
+    const pendingTasks = allTasks.filter(t => t.status === 'Pending' || t.status === 'In Progress');
+    
+    if (pendingTasks.length === 0) {
+        return { status: 'done', blockedCount: 0, pendingCount: 0 };
+    }
+
+    const unblockedTasks = pendingTasks.filter(task => {
         // Filter out locked tasks to prevent collisions
         if (task.lock) return false;
-
-        if (task.status !== 'Pending' && task.status !== 'In Progress') return false;
 
         // In Progress tasks are always unblocked (already started)
         if (task.status === 'In Progress') return true;
@@ -266,7 +277,11 @@ export class SpecEngine {
         return true;
     });
 
-    return unblockedTasks.sort((a: any, b: any) => {
+    if (unblockedTasks.length === 0) {
+        return { status: 'blocked', blockedCount: pendingTasks.length, pendingCount: pendingTasks.length };
+    }
+
+    const sortedTasks = unblockedTasks.sort((a: any, b: any) => {
         // Sort by Status (In Progress > Pending)
         if (a.status === 'In Progress' && b.status !== 'In Progress') return -1;
         if (b.status === 'In Progress' && a.status !== 'In Progress') return 1;
@@ -280,6 +295,13 @@ export class SpecEngine {
         // Then by ID ASC
         return a.id.localeCompare(b.id);
     });
+
+    return { 
+        status: 'task',
+        task: sortedTasks[0],
+        pendingCount: pendingTasks.length,
+        blockedCount: pendingTasks.length - unblockedTasks.length
+    };
   }
 
   public getImpact(id: string): ImpactNode | null {

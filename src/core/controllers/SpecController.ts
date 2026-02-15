@@ -171,10 +171,10 @@ export class SpecController {
     return { status: 'success', message: 'Specification synced to graph database.' };
   }
 
-  public async runScenario(id: string, ui: UserInterface) {
+  public async runScenario(id: string, ui: UserInterface, interactive: boolean = true) {
     this.ensureInitialized();
     await this.engine!.sync();
-    const runner = new ScenarioRunner(this.db!, ui);
+    const runner = new ScenarioRunner(this.db!, ui, interactive);
     return runner.run(id);
   }
 
@@ -193,8 +193,7 @@ export class SpecController {
   public async getNextTask() {
     this.ensureInitialized();
     await this.engine!.sync();
-    const tasks = this.engine!.getPendingTasks();
-    return tasks.length > 0 ? tasks[0] : null;
+    return this.engine!.getPendingTasks();
   }
 
   public getInfo() {
@@ -205,7 +204,11 @@ export class SpecController {
         version: '1.0.0', 
         mode: existsSync(dbPath) ? 'Active' : 'Not Initialized',
         mandatory_protocols_path: ".spec/core/protocol/",
-        instruction: "You MUST read and internalize ALL documents in the mandatory_protocols_path before performing any actions."
+        instruction: "You MUST read and internalize ALL documents in the mandatory_protocols_path before performing any actions.",
+        templates: {
+            tasks_path: ".spec/core/templates/tasks/",
+            available: ["feature.json", "design.json", "process.json"]
+        }
     };
   }
 
