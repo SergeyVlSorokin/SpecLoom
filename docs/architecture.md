@@ -1,9 +1,11 @@
 # SpecLoom Architecture
 
 ## 1. Overview
+
 SpecLoom operates as a hybrid system: part **CLI tool** for human developers and part **MCP Server** for AI agents. It serves as a "Compliance & Traceability Layer" that sits between the intent (Requirements) and the realization (Code).
 
 ### System Context
+
 ```mermaid
 graph TD
     User[Human Developer] -->|CLI Command| CLI[CLI Adapter]
@@ -25,18 +27,23 @@ graph TD
 ## 2. Core Components
 
 ### 2.1 The Traceability Graph
+
 At the heart of SpecLoom is a **Directed Acyclic Graph (DAG)** that maps every artifact in the software lifecycle.
-*   **Storage:** The source of truth is a set of human-readable JSON files in `.spec/data/`.
-*   **Indexing:** For performance, these files are indexed into a local SQLite database (`.spec/graph.db`).
-*   **Nodes:** Every artifact (User Story, API Endpoint, Test Case, Task) is a node.
-*   **Edges:** Relationships (traces) connect nodes (e.g., `FR-001` *satisfies* `UR-005`).
+
+* **Storage:** The source of truth is a set of human-readable JSON files in `.spec/data/`.
+* **Indexing:** For performance, these files are indexed into a local SQLite database (`.spec/graph.db`).
+* **Nodes:** Every artifact (User Story, API Endpoint, Test Case, Task) is a node.
+* **Edges:** Relationships (traces) connect nodes (e.g., `FR-001` *satisfies* `UR-005`).
 
 ### 2.2 The Dual Interface Strategy
+
 To support the HADD (Human-Augmented Design & Development) framework, SpecLoom exposes identical functionality through two interfaces:
-1.  **CLI (Commander.js):** Standard unix-style commands for CI/CD and human usage.
-2.  **MCP Server (Model Context Protocol):** A JSON-RPC over Stdio interface that allows AI Agents (Cursor, Windsurf, Claude) to query the graph and perform actions as tools.
+
+1. **CLI (Commander.js):** Standard unix-style commands for CI/CD and human usage.
+2. **MCP Server (Model Context Protocol):** A JSON-RPC over Stdio interface that allows AI Agents (Cursor, Windsurf, Claude) to query the graph and perform actions as tools.
 
 ### 2.3 Directory Structure (The V-Model Spine)
+
 The architecture enforces a physical separation of concerns mapping to the V-Model:
 
 | Directory | Layer | Purpose |
@@ -124,24 +131,30 @@ graph TD
 ## 4. Key Subsystems
 
 ### 4.1 SpecEngine
+
 The central controller that orchestrates all read/write operations.
-*   **Responsibilities:**
-    *   Syncing file system state to the GraphDB.
-    *   Enforcing unique IDs and schema validation.
-    *   Managing Task locks.
+
+* **Responsibilities:**
+  * Syncing file system state to the GraphDB.
+  * Enforcing unique IDs and schema validation.
+  * Managing Task locks.
 
 ### 4.2 Context Slicer
+
 A specialized service designed for LLM context window optimization.
-*   **Problem:** Sending the entire specification to an AI agent is too expensive/large.
-*   **Solution:** The Slicer retrieves only the relevant subgraph around a focus node (e.g., "Get `TASK-001` and its immediate dependencies").
+
+* **Problem:** Sending the entire specification to an AI agent is too expensive/large.
+* **Solution:** The Slicer retrieves only the relevant subgraph around a focus node (e.g., "Get `TASK-001` and its immediate dependencies").
 
 ### 4.3 Process Guardian
+
 Enforces the rules of the methodology.
-*   **Gatekeeping:** Prevents moving to Implementation if Design is missing.
-*   **Identity Checks:** Enforces the "Four-Eyes Principle" (Implementer != Reviewer).
+
+* **Gatekeeping:** Prevents moving to Implementation if Design is missing.
+* **Identity Checks:** Enforces the "Four-Eyes Principle" (Implementer != Reviewer).
 
 ## 5. Architectural Decisions (ADRs)
 
-*   **ADR-001: Embedded Graph Database:** We use `better-sqlite3` for complex queries while keeping JSON as the git-friendly storage format.
-*   **ADR-002: Dual-Interface Core:** Core logic is isolated from the presentation layer to ensure parity between CLI and MCP.
-*   **ADR-003: Optimistic Locking:** We use file-based locks to handle concurrency between multiple agents without a central server.
+* **ADR-001: Embedded Graph Database:** We use `better-sqlite3` for complex queries while keeping JSON as the git-friendly storage format.
+* **ADR-002: Dual-Interface Core:** Core logic is isolated from the presentation layer to ensure parity between CLI and MCP.
+* **ADR-003: Optimistic Locking:** We use file-based locks to handle concurrency between multiple agents without a central server.
