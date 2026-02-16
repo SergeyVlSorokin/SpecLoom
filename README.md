@@ -5,7 +5,7 @@
 [![npm version](https://badge.fury.io/js/specloom.svg)](https://badge.fury.io/js/specloom)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-SpecLoom is an **MCP Server** and **CLI** designed to enforce the V-Model (Waterfall-Agile Hybrid) for AI-generated code. It acts as a **Guardian** that prevents hallucinations, ensures traceability, and mandates that every line of code serves a documented requirement.
+SpecLoom is an **MCP Server** and **CLI** designed to enforce the V-Model in agile and iterative developemnt environments for AI-generated code. It acts as a **Guardian** that prevents hallucinations, ensures traceability, and mandates that every line of code serves a documented requirement.
 
 **Stop "Vibe Coding". Start Engineering.**
 
