@@ -34,12 +34,14 @@ export class InitService {
         if (existsSync(assetsDir)) {
              cpSync(join(assetsDir, 'schemas'), join(this.projectRoot, '.spec/core/schemas'), { recursive: true });
              cpSync(join(assetsDir, 'templates'), join(this.projectRoot, '.spec/core/templates'), { recursive: true });
+             cpSync(join(assetsDir, 'protocol'), join(this.projectRoot, '.spec/core/protocol'), { recursive: true });
         } else {
              // Development Fallback (if running ts-node directly)
              const devAssetsDir = resolve(process.cwd(), 'src/assets');
              if (existsSync(devAssetsDir)) {
                   cpSync(join(devAssetsDir, 'schemas'), join(this.projectRoot, '.spec/core/schemas'), { recursive: true });
                   cpSync(join(devAssetsDir, 'templates'), join(this.projectRoot, '.spec/core/templates'), { recursive: true });
+                  cpSync(join(devAssetsDir, 'protocol'), join(this.projectRoot, '.spec/core/protocol'), { recursive: true });
              } else {
                   console.warn('Warning: Could not find assets directory to scaffold .spec/core.');
                   // Create empty dirs as fallback
