@@ -9,51 +9,71 @@ ightarrow$) represent "Traces To" (Depends On). If a parent node changes, all ch
 
 ```mermaid
 graph TD
-    %% --- LAYER 0: CONTEXT & GOVERNANCE ---
-    CTX[Product Context]
-    STK[Stakeholder] --> CTX
-    
-    %% --- LAYER 1: DRIVERS ---
-    %% Stakeholders drive Policy & Quality
-    BR[Business Rule] --> STK
-    NFR[Non-Functional Req] --> STK
-    CON[Constraint] --> STK
-    
-    %% Users drive Functionality
-    UCH[User Characteristic] --> STK
-    %% (UCH links to STK only to show who 'represents' this persona, but UCH is the Actor)
+    subgraph Layer_0_Foundation ["0. Foundation & Context"]
+        SYS[System Requirement]
+        CTX[Product Context]
+        STK[Stakeholder] --> CTX
+        REF[Reference Source] --> CTX
+    end
 
-    %% --- LAYER 2: INTENT ---
-    %% A User Requirement comes ONLY from a User Characteristic
-    UR[User Requirement] --> UCH
+    subgraph Layer_1_Drivers ["1. Strategy & Drivers"]
+        BR[Business Rule] --> STK
+        NFR[Non-Functional Req] --> STK
+        CON[Constraint] --> STK
+        UCH[User Characteristic] --> STK
+        ASM[Assumption]
+    end
+
+    subgraph Layer_2_Specification ["2. Specification (The What)"]
+        UR[User Requirement] --> UCH
+        FR[Functional Requirement] --> UR
+        FR --> BR
+        FR --> CON
+        FR --> NFR
+        FR -.-> ASM
+    end
+
+    subgraph Layer_3_Architecture ["3. Architecture (The How)"]
+        VIEW[Architecture View] --> FR
+        API[API Contract] --> FR
+        DATA[Data Model] --> FR
+        EXT[External Interface] --> API
+        
+        %% ADRs can be triggered by any requirement or assumption
+        ADR[Arch. Decision] --> NFR
+        ADR --> CON
+        ADR --> FR
+        ADR --> ASM
+    end
+
+    subgraph Layer_4_Execution ["4. Execution (The Plan)"]
+        TASK[Execution Task] --> FR
+        TASK --> ADR
+        TASK --> SYS
+    end
     
-    %% --- LAYER 3: SPECIFICATION ---
-    %% A Function must satisfy a User Need OR comply with a Rule
-    FR[Functional Requirement] --> UR
-    FR --> BR
-    FR --> CON
-    FR --> NFR
-    
-    %% --- LAYER 4: ARCHITECTURE (How) ---
-    VIEW[Architecture View] --> FR
-    API[API Contract] --> FR
-    DATA[Data Model] --> FR
-    ADR[Arch. Decision] --> NFR
-    ADR --> CON
-    
-    %% --- LAYER 5: EXECUTION (The Plan) ---
-    TASK[Execution Task] --> FR
-    TASK --> ADR
-    
-    %% --- LAYER 6: REALITY (The Code) ---
-    CODE[Implementation (src)] -.->|@trace| FR
-    CODE -.->|@trace| BR
-    
-    %% --- LAYER 7: VALIDATION (The Proof) ---
-    TEST[Verification (tests)] -.->|@trace| FR
-    SCN[Test Scenario] -.->|@trace| FR
-    SCN -.->|@trace| UR
+    subgraph Layer_5_Verification ["5. Verification (The Proof)"]
+        CODE["Implementation (src)"] -.->|"@trace"| FR
+        TEST["Verification (tests)"] -.->|"@trace"| FR
+        SCN[Test Scenario] -.->|"@trace"| FR
+    end
 ```
+
+### Traceability Matrix
+
+| Artifact Type | Traces To (Parents) | Driven By (Children) |
+| :--- | :--- | :--- |
+| **System Req (`SYS`)** | *None (Root)* | Process Tasks |
+| **Stakeholder (`STK`)** | Product Context | BR, NFR, CON, UCH |
+| **User Char (`UCH`)** | Stakeholder | User Requirements |
+| **User Req (`UR`)** | User Char | Functional Reqs |
+| **Business Rule (`BR`)** | Stakeholder | Functional Reqs |
+| **Constraint (`CON`)** | Stakeholder | Functional Reqs, ADRs |
+| **Non-Functional (`NFR`)**| Stakeholder | Functional Reqs, ADRs |
+| **Assumption (`ASM`)** | *None (Root)* | FRs, ADRs |
+| **Functional Req (`FR`)** | UR, BR, NFR, CON, ASM | Architecture, Tasks, Code, Tests |
+| **ADR** | FR, NFR, CON, ASM | Tasks, Architecture Views |
+| **Execution Task** | FR, ADR, SYS | Sessions, Code Changes |
 
 ## 2. Definitions & Rules
 
