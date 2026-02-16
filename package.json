@@ -1,6 +1,6 @@
 {
   "name": "specloom",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,9 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs",
+    "CONTRIBUTING.md"
   ],
   "bugs": {
     "url": "https://github.com/kpruntov/SpecLoom/issues"

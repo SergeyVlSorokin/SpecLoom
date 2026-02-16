@@ -68,6 +68,8 @@ Add SpecLoom to your agent's settings:
 ## 📄 Documentation
 
 *   **[Manual (The Theory)](docs/manual.md)**: Deep dive into the V-Model, HADD framework, and advanced workflows.
+*   **[Architecture](docs/architecture.md)**: System design, diagrams, and core components.
+*   **[Methodology](docs/methodology.md)**: The philosophy behind HADD and the V-Model.
 *   **[Contributing](CONTRIBUTING.md)**: How to build and extend SpecLoom.
 
 ## License
