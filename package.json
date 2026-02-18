@@ -1,11 +1,11 @@
 {
   "name": "specloom",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "rm -rf dist && tsc && cp -r src/assets dist/"
+    "build": "rm -rf dist && tsc && cp -r src/assets dist/ && mkdir -p dist/src/core/prompts/standard_procedures && cp -r src/core/prompts/standard_procedures/* dist/src/core/prompts/standard_procedures/"
   },
   "repository": {
     "type": "git",

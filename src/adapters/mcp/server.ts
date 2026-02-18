@@ -4,11 +4,15 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { SpecController } from '../../core/controllers/SpecController.js';
+import { PromptFactory } from '../../core/prompts/PromptFactory.js';
 
 const projectRoot = process.cwd();
 const controller = new SpecController(projectRoot);
+const promptFactory = new PromptFactory(projectRoot);
 
 const server = new Server(
   {
@@ -18,6 +22,7 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      prompts: {},
     },
   }
 );
@@ -142,17 +147,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         }
       },
       {
-        name: 'loom_bundle',
-        description: 'Get execution context bundle for a task (Explicit)',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            task_id: { type: 'string', description: 'Task ID' }
-          },
-          required: ['task_id']
-        },
-      },
-      {
         name: 'loom_impact',
         description: 'Analyze impact of a change to an artifact',
         inputSchema: {
@@ -188,6 +182,88 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
     ],
   };
+});
+
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: [
+      { name: 'init', description: 'Initialize project context (Product Manager role)' },
+      { name: 'req', description: 'Define requirements (Business Analyst role)' },
+      { name: 'arch', description: 'Define architecture (System Architect role)' },
+      { name: 'plan', description: 'Create execution plan (Technical Lead role)' },
+      { name: 'impl', description: 'Implement tasks (Lead Developer role)' },
+      { name: 'verify', description: 'Verify implementation (QA Engineer role)' },
+      { name: 'info', description: 'Get SpecLoom manual and guide' },
+      { name: 'project', description: 'Get project context summary' },
+      { name: 'status', description: 'Get project health and status' },
+      { name: 'context', description: 'Get context for a specific task or node', arguments: [{ name: 'id', description: 'Artifact ID', required: true }] },
+    ]
+  };
+});
+
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+  
+  try {
+      const state = await controller.getStateAnalyzer().getHealthCheck();
+      const basePrompt = promptFactory.getPrompt(name);
+      
+      let contextData = "";
+      
+      // Dynamic Context Injection based on command
+      if (name === 'status') {
+          const status = await controller.getStatus();
+          contextData = JSON.stringify(status, null, 2);
+      } else if (name === 'context') {
+          let id = args?.id as string;
+          if (id) {
+              // Regex Normalization: Matches "TASK-063", "task 63", "task63", "fr-1"
+              const match = id.trim().match(/^([a-zA-Z]+)[- ]?(\d+)$/);
+              if (match) {
+                  const prefix = match[1]!.toUpperCase();
+                  const num = match[2]!.padStart(3, '0');
+                  id = `${prefix}-${num}`;
+              } else {
+                  id = id.trim().toUpperCase();
+              }
+
+              if (id.startsWith('TASK-')) {
+                  const bundle = await controller.getContextBundle(id);
+                  contextData = JSON.stringify(bundle, null, 2);
+              } else {
+                  const slice = await controller.getContext(id);
+                  contextData = JSON.stringify(slice, null, 2);
+              }
+          }
+      } else if (name === 'project') {
+          // Project prompt already instructs to read files, but we can pre-fetch if needed.
+          // For now, let the static prompt guide the agent to read.
+      }
+
+      return {
+          messages: [
+              {
+                  role: 'user',
+                  content: {
+                      type: 'text',
+                      text: `[System State: ${state}]\n\n${basePrompt}\n\n${contextData ? "### Active Context Data\n" + contextData : ""}`
+                  }
+              }
+          ]
+      };
+  } catch (error: any) {
+      return {
+          messages: [
+              {
+                  role: 'user',
+                  content: {
+                      type: 'text',
+                      text: `Error generating prompt for ${name}: ${error.message}`
+                  }
+              }
+          ]
+      };
+  }
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -229,13 +305,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: 'text', text: result.message }] };
     }
 
-    /** @trace FR-027 */
-    if (name === 'loom_bundle') {
-        const taskId = args?.task_id as string;
-        const result = await controller.getContextBundle(taskId);
-        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
-    }
-
     /** @trace FR-028 */
     if (name === 'loom_check_gate') {
         const phase = args?.phase as string;
@@ -244,8 +313,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === 'loom_context') {
-        const id = (args?.id as string) || (args?.node as string); // Backwards compat attempt
+        let id = (args?.id as string) || (args?.node as string); // Backwards compat attempt
         if (!id) throw new Error("Missing 'id' parameter");
+
+        // Regex Normalization
+        const match = id.trim().match(/^([a-zA-Z]+)[- ]?(\d+)$/);
+        if (match) {
+            const prefix = match[1]!.toUpperCase();
+            const num = match[2]!.padStart(3, '0');
+            id = `${prefix}-${num}`;
+        } else {
+            id = id.trim().toUpperCase();
+        }
 
         if (id.startsWith('TASK-')) {
              const result = await controller.getContextBundle(id);

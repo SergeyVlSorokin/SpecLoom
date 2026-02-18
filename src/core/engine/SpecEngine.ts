@@ -172,6 +172,8 @@ export class SpecEngine {
       if (id.startsWith('SYS-')) return NodeType.SYSTEM_REQUIREMENT;
       if (id.startsWith('SCN-')) return NodeType.TEST_SCENARIO;
       if (id.startsWith('REF-')) return NodeType.REFERENCE_SOURCE;
+      if (id.startsWith('FRT-')) return NodeType.FAULT_REPORT;
+      if (id.startsWith('RCA-')) return NodeType.ROOT_CAUSE_ANALYSIS;
       return null;
   }
 

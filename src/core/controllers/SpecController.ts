@@ -7,6 +7,7 @@ import { ProcessGuardian } from '../engine/ProcessGuardian.js';
 import { WorkflowService } from '../use-cases/WorkflowService.js';
 import { InitService } from '../use-cases/InitService.js';
 import { DocGenerator } from '../use-cases/DocGenerator.js';
+import { StateAnalyzer } from '../engine/StateAnalyzer.js';
 import { existsSync, copyFileSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
 
@@ -19,6 +20,7 @@ export class SpecController {
   private workflowService?: WorkflowService;
   private initService: InitService;
   private docGenerator?: DocGenerator;
+  private stateAnalyzer?: StateAnalyzer;
 
   constructor(private projectRoot: string) {
     this.initService = new InitService(projectRoot);
@@ -36,6 +38,7 @@ export class SpecController {
             this.guardian = new ProcessGuardian(this.db);
             this.workflowService = new WorkflowService(this.db, projectRoot);
             this.docGenerator = new DocGenerator(this.db, join(projectRoot, '.spec/core/templates'));
+            this.stateAnalyzer = new StateAnalyzer(this.engine);
         } catch (e) {
             console.warn("Failed to initialize GraphDatabase (Run 'loom init' first):", e);
         }
@@ -221,6 +224,11 @@ export class SpecController {
   public getImpact(id: string) {
     this.ensureInitialized();
     return this.engine!.getImpact(id);
+  }
+
+  public getStateAnalyzer() {
+      this.ensureInitialized();
+      return this.stateAnalyzer!;
   }
 
   public dispose() {
