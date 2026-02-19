@@ -13,6 +13,7 @@ import { join, basename } from 'path';
 export interface NextTaskResult {
     status: 'task' | 'done' | 'blocked';
     task?: any;
+    tasks?: any[]; // List of all actionable tasks
     blockedCount: number;
     pendingCount: number;
 }
@@ -79,6 +80,35 @@ export class SpecEngine {
     await this.sync();
   }
 
+  /**
+   * @trace TASK-076 (Verification Workflow)
+   */
+  public async updateScenarioResult(id: string, result: string) {
+    // Find file path
+    const specFiles = await this.scanner.scan(['.spec/data/**/*.json'], { respectIgnoreFiles: false });
+    let targetPath = '';
+    let content: any = null;
+
+    for (const filePath of specFiles) {
+        try {
+            const fileContent = JSON.parse(readFileSync(filePath, 'utf8'));
+            if (fileContent.id === id) {
+                targetPath = filePath;
+                content = fileContent;
+                break;
+            }
+        } catch (e) { }
+    }
+
+    if (!targetPath || !content) throw new Error(`Scenario ${id} not found.`);
+
+    content.last_run_status = result; // Pass/Fail/Skipped
+    content.last_run_date = new Date().toISOString();
+    
+    writeFileSync(targetPath, JSON.stringify(content, null, 2));
+    await this.sync();
+  }
+
   public async sync() {
     // Phase 1: Scan .spec/data for all JSON artifacts
     const dataDir = join(this.projectRoot, '.spec/data');
@@ -86,6 +116,7 @@ export class SpecEngine {
     
     // Map to track ID -> FilePath to detect collisions
     const knownIds = new Map<string, string>();
+    const foundIds = new Set<string>();
 
     for (const filePath of specFiles) {
         // Skip registry.json itself if it still exists
@@ -100,6 +131,7 @@ export class SpecEngine {
                     throw new Error(`Duplicate ID detected: ${content.id} is defined in both '${knownIds.get(content.id)}' and '${filePath}'`);
                 }
                 knownIds.set(content.id, filePath);
+                foundIds.add(content.id);
             }
             
             // Prioritize inferred type for system consistency (e.g. TASK-XXX is always execution_task)
@@ -137,6 +169,25 @@ export class SpecEngine {
             } else {
                  console.error(`Failed to process file ${filePath}:`, error);
             }
+        }
+    }
+
+    // Phase 1.5: Prune stale nodes (Nodes in DB but not in FS, excluding Implementation/Verification)
+    const allNodes = this.db.getAllNodes();
+    for (const node of allNodes) {
+        // Skip nodes managed by other scanners
+        if (node.type === NodeType.IMPLEMENTATION || node.type === NodeType.VERIFICATION) {
+            continue;
+        }
+
+        if (!foundIds.has(node.id)) {
+            // console.log(`Pruning stale node: ${node.id}`);
+            // TODO: In verbose mode, log this.
+            // Also need to be careful about nodes that are NOT file-based but persistent?
+            // Currently, all non-impl/verif nodes should be file-based.
+            // Exception: Fault Reports if created via API and not saved to file yet? 
+            // But system design says everything is file-based.
+            this.db.deleteNode(node.id);
         }
     }
 
@@ -227,7 +278,10 @@ export class SpecEngine {
     };
   }
 
-  public getPendingTasks(): NextTaskResult {
+  /**
+   * @trace TASK-074 (Enhance loom next with Task Listing)
+   */
+  public getPendingTasks(list: boolean = false): NextTaskResult {
     // Fetch all execution tasks to build dependency graph
     const stmt = this.db['db'].prepare("SELECT * FROM nodes WHERE type = 'execution_task'");
     const rows = stmt.all() as any[];
@@ -250,7 +304,8 @@ export class SpecEngine {
 
     const unblockedTasks = pendingTasks.filter(task => {
         // Filter out locked tasks to prevent collisions
-        if (task.lock) return false;
+        // But if listing, we might want to show them? No, loom next recommends actionable ones.
+        if (!list && task.lock) return false;
 
         // In Progress tasks are always unblocked (already started)
         if (task.status === 'In Progress') return true;
@@ -298,12 +353,52 @@ export class SpecEngine {
         return a.id.localeCompare(b.id);
     });
 
+    if (list) {
+        return {
+            status: 'task',
+            tasks: sortedTasks,
+            pendingCount: pendingTasks.length,
+            blockedCount: pendingTasks.length - unblockedTasks.length
+        };
+    }
+
     return { 
         status: 'task',
         task: sortedTasks[0],
         pendingCount: pendingTasks.length,
         blockedCount: pendingTasks.length - unblockedTasks.length
     };
+  }
+
+  public getReviewTasks(): any[] {
+    const stmt = this.db['db'].prepare("SELECT * FROM nodes WHERE type = 'execution_task'");
+    const rows = stmt.all() as any[];
+    
+    return rows
+        .map(row => JSON.parse(row.content))
+        .filter(task => task.status === 'Review')
+        .sort((a, b) => a.id.localeCompare(b.id));
+  }
+
+  /**
+   * @trace TASK-076 (Verification Stats)
+   */
+  public async getVerificationStats() {
+      const stmt = this.db['db'].prepare("SELECT * FROM nodes WHERE type = 'test_scenario'");
+      const rows = stmt.all() as any[];
+      const scenarios = rows.map(row => JSON.parse(row.content));
+      
+      const passed = scenarios.filter(s => s.last_run_status === 'Pass').length;
+      const failed = scenarios.filter(s => s.last_run_status === 'Fail').length;
+      const untested = scenarios.length - passed - failed;
+      
+      return {
+          total: scenarios.length,
+          passed,
+          failed,
+          untested,
+          scenarios
+      };
   }
 
   public getImpact(id: string): ImpactNode | null {

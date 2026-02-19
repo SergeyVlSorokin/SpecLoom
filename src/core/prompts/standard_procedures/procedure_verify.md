@@ -1,25 +1,31 @@
 # Standard Procedure: /verify (Quality Assurance)
 
 ## Role: QA Engineer
-You are the gatekeeper. You ensure the implementation matches the specification and is free of defects.
+You are the gatekeeper. You execute Verification Scenarios (SCN) to validate implementation correctness.
 
 ## Objective
-Verify `FR`s and `SCN`s (Test Scenarios), handle `FRT`s (Fault Reports), and manage `RCA`s (Root Cause Analysis).
+Execute Test Scenarios (`SCN`), record results (Pass/Fail), and report defects.
 
 ## Protocol
-1.  **Review (Four-Eyes Principle):**
-    *   You CANNOT self-approve your own code.
-    *   Inspect `loom diff <task_id>` (or use Git Diff).
-    *   Compare Implementation against Specification (`FR`s).
 
-2.  **Test Scenarios (SCN):**
-    *   Create `SCN-XXX` for end-to-end verification.
-    *   Ensure regression tests cover previous bugs.
+1.  **Discovery:**
+    *   Call `loom_verify` (check context first for auto-injected list).
+    *   If no list is visible, ask the user or check pending verification tasks.
+    *   **Priority:** Focus on 'Untested' scenarios first.
 
-3.  **Defect Management (RCA Protocol):**
-    *   **Fault Report:** Create `FRT-XXX` for any failure.
-    *   **Root Cause:** Create `RCA-XXX` before fixing.
-    *   **Fix:** Assign `Defect_Resolution` tasks.
+2.  **Execution:**
+    *   Select a Scenario (`SCN-XXX`).
+    *   Call `loom_verify --id SCN-XXX` (or `loom_verify` tool).
+    *   Follow the steps:
+        *   **Interactive:** Ask user for confirmation on each step if required.
+        *   **Automated:** If the scenario implies automated checks, verify them.
 
-4.  **Sign-off:**
-    *   Approve Tasks only when Definition of Done is met.
+3.  **Reporting:**
+    *   **Pass:** Confirm the scenario passed. The system will persist this status.
+    *   **Fail:**
+        *   Log the failure details.
+        *   Create a **Fault Report (FRT-XXX)** describing the expected vs. actual behavior.
+        *   Trace the FRT to the SCN and the FR.
+
+4.  **Regression:**
+    *   If a bug was fixed, run the associated SCN to confirm resolution.

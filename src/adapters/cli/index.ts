@@ -79,6 +79,10 @@ program
         console.log(`  - ${state}: ${count}`);
       });
 
+      console.log('\n--- Verification Status ---');
+      const vStats = await controller.getVerificationStats();
+      console.log(`Passed: ${vStats.passed} | Failed: ${vStats.failed} | Untested: ${vStats.untested} (Total: ${vStats.total})`);
+
       console.log('\n--- V-Model Artifacts ---');
       status.stageStatus.forEach(stage => {
         const marker = stage.count > 0 ? ' [x] ' : ' [ ] ';
@@ -103,9 +107,10 @@ program
 program
   .command('next')
   .description('Get the next pending task from the plan')
-  .action(async () => {
+  .option('-l, --list', 'List all pending actionable tasks')
+  .action(async (options) => {
     try {
-      const result = await controller.getNextTask();
+      const result = await controller.getNextTask(options.list);
       
       if (result.status === 'done') {
         console.log('All tasks completed! The plan is fulfilled.');
@@ -114,23 +119,35 @@ program
         console.log(`There are ${result.blockedCount} pending tasks, but they are all blocked by dependencies.`);
         console.log('Check "loom status" or review dependencies.');
       } else {
-        const task = result.task;
-        console.log(`\n>>> NEXT OBJECTIVE: ${task.id} <<<`);
-        console.log(`Title: ${task.title}`);
-        console.log(`Type: ${task.type}`);
-        console.log(`Objective: ${task.objective}`);
-        
-        if (task.ai_instructions && task.ai_instructions.length > 0) {
-          console.log('\n--- AI Protocol ---');
-          task.ai_instructions.forEach((instr: string) => console.log(`[ ] ${instr}`));
-        } else if (task.execution_steps && task.execution_steps.length > 0) {
-           console.log('\n--- Execution Steps ---');
-           task.execution_steps.forEach((step: string) => console.log(`[ ] ${step}`));
-        }
+        if (options.list && result.tasks) {
+            console.log(`\n>>> ACTIONABLE TASKS (${result.tasks.length}) <<<`);
+            // ID | Priority | Title | Status
+            console.log('ID'.padEnd(10) + ' | ' + 'Prio'.padEnd(5) + ' | ' + 'Status'.padEnd(12) + ' | ' + 'Title');
+            console.log('-'.repeat(80));
+            result.tasks.forEach((t: any) => {
+                const prio = (t.priority || 0).toString();
+                const title = t.title.length > 50 ? t.title.substring(0, 47) + '...' : t.title;
+                console.log(`${t.id.padEnd(10)} | ${prio.padEnd(5)} | ${t.status.padEnd(12)} | ${title}`);
+            });
+        } else {
+            const task = result.task;
+            console.log(`\n>>> NEXT OBJECTIVE: ${task.id} <<<`);
+            console.log(`Title: ${task.title}`);
+            console.log(`Type: ${task.type}`);
+            console.log(`Objective: ${task.objective}`);
+            
+            if (task.ai_instructions && task.ai_instructions.length > 0) {
+              console.log('\n--- AI Protocol ---');
+              task.ai_instructions.forEach((instr: string) => console.log(`[ ] ${instr}`));
+            } else if (task.execution_steps && task.execution_steps.length > 0) {
+               console.log('\n--- Execution Steps ---');
+               task.execution_steps.forEach((step: string) => console.log(`[ ] ${step}`));
+            }
 
-        if (task.context && task.context.relevant_files) {
-          console.log('\n--- Context ---');
-          console.log('Relevant Files:', task.context.relevant_files.join(', '));
+            if (task.context && task.context.relevant_files) {
+              console.log('\n--- Context ---');
+              console.log('Relevant Files:', task.context.relevant_files.join(', '));
+            }
         }
       }
     } catch (error: any) {
@@ -184,12 +201,34 @@ program
     }
   });
 
+/**
+ * @trace TASK-076 (Verify Command & List)
+ */
 program
   .command('verify')
   .description('Run a Verification Scenario (interactive)')
-  .requiredOption('--id <id>', 'Scenario ID (e.g., SCN-001)')
+  .option('-l, --list', 'List all Verification Scenarios and their status')
+  .option('--id <id>', 'Scenario ID (e.g., SCN-001)')
   .action(async (options) => {
     try {
+      if (options.list) {
+          const stats = await controller.getVerificationStats();
+          console.log(`\n>>> VERIFICATION SCENARIOS (${stats.total}) <<<`);
+          console.log('ID'.padEnd(10) + ' | ' + 'Status'.padEnd(10) + ' | ' + 'Title');
+          console.log('-'.repeat(80));
+          stats.scenarios.forEach((s: any) => {
+              const status = s.last_run_status || 'Untested';
+              const title = s.title.length > 50 ? s.title.substring(0, 47) + '...' : s.title;
+              console.log(`${s.id.padEnd(10)} | ${status.padEnd(10)} | ${title}`);
+          });
+          return;
+      }
+
+      if (!options.id) {
+          console.error('Error: required option \'--id <id>\' not specified (unless --list is used)');
+          process.exit(1);
+      }
+
       // CLI User Interface Adapter
       const ui = {
         ask: (question: string) => {
@@ -307,9 +346,11 @@ program
   .command('diff')
   .description('Show git diff for the current task context')
   .argument('<id>', 'Task ID')
-  .action(async (id) => {
+  .option('-s, --summary', 'Show summary of changes instead of full diff')
+  .action(async (id, options) => {
     try {
-        const diff = await controller.getTaskDiff(id);
+        const mode = options.summary ? 'summary' : 'full';
+        const diff = await controller.getTaskDiff(id, mode);
         console.log(diff);
     } catch (error: any) {
         console.error('Diff failed:', error.message);
@@ -352,11 +393,88 @@ program
     }
   });
 
+/**
+ * @trace TASK-075 (Review Command)
+ */
+program
+  .command('review')
+  .description('Review tasks (List or Interactive)')
+  .option('-i, --interactive', 'Interactive review mode')
+  .action(async (options) => {
+    try {
+        const tasks = await controller.getReviewTasks();
+        
+        if (tasks.length === 0) {
+            console.log('No tasks in Review status.');
+            return;
+        }
 
+        console.log(`\n>>> TASKS IN REVIEW (${tasks.length}) <<<`);
+        console.log('ID'.padEnd(10) + ' | ' + 'Implementer'.padEnd(15) + ' | ' + 'Title');
+        console.log('-'.repeat(80));
+        tasks.forEach((t: any) => {
+            const impl = (t.implementer || 'Unknown').substring(0, 15);
+            const title = t.title.length > 50 ? t.title.substring(0, 47) + '...' : t.title;
+            console.log(`${t.id.padEnd(10)} | ${impl.padEnd(15)} | ${title}`);
+        });
 
+        if (options.interactive) {
+            if (tasks.length === 1) {
+                await runInteractiveReview(tasks[0].id);
+            } else {
+                const rl = createInterface({
+                    input: process.stdin,
+                    output: process.stdout
+                });
+                
+                await new Promise<void>((resolve) => {
+                    rl.question('\nEnter Task ID to review: ', async (answer) => {
+                        rl.close();
+                        if (answer.trim()) {
+                            await runInteractiveReview(answer.trim());
+                        }
+                        resolve();
+                    });
+                });
+            }
+        }
+    } catch (error: any) {
+        console.error('Review failed:', error.message);
+        process.exit(1);
+    } finally {
+        controller.dispose();
+    }
+  });
 
+async function runInteractiveReview(taskId: string) {
+    try {
+        console.log(`\nFetching diff for ${taskId}...`);
+        const diff = await controller.getTaskDiff(taskId);
+        console.log('\n' + diff);
+        console.log('-'.repeat(80));
+        
+        const rl = createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        
+        const answer = await new Promise<string>(resolve => {
+            rl.question('Approve this task? [y/N]: ', resolve);
+        });
+        rl.close();
 
-
+        if (answer.toLowerCase() === 'y') {
+            const reviewer = process.env.USER || process.env.USERNAME || 'reviewer';
+            const result = await controller.approveTask(taskId, reviewer);
+            console.log(result.message);
+        } else {
+            console.log('Review cancelled.');
+        }
+    } catch (e: any) {
+        console.error('Error:', e.message);
+    }
+    // Do not dispose here, let the main action dispose
+}
 
 program
   .command('generate')

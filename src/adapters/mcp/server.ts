@@ -42,8 +42,31 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'loom_next',
-        description: 'Get the next recommended task for the agent',
+        description: 'Get the next recommended task for the agent, or a list of all actionable tasks.',
+        inputSchema: { 
+            type: 'object', 
+            properties: {
+                list: { type: 'boolean', description: 'If true, returns a list of all actionable tasks.' }
+            } 
+        },
+      },
+      /** @trace TASK-077 (Smart Review) */
+      {
+        name: 'loom_list_reviews',
+        description: 'List all tasks currently in Review status.',
         inputSchema: { type: 'object', properties: {} },
+      },
+      {
+        name: 'loom_get_diff',
+        description: 'Get the git diff for a specific task.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                id: { type: 'string', description: 'Task ID' },
+                summary: { type: 'boolean', description: 'Show summary only' }
+            },
+            required: ['id']
+        },
       },
       {
         name: 'loom_start',
@@ -197,6 +220,8 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
       { name: 'project', description: 'Get project context summary' },
       { name: 'status', description: 'Get project health and status' },
       { name: 'context', description: 'Get context for a specific task or node', arguments: [{ name: 'id', description: 'Artifact ID', required: true }] },
+      { name: 'next', description: 'Get next actionable task' },
+      { name: 'review', description: 'Review completed tasks (Smart Mode)' },
     ]
   };
 });
@@ -238,6 +263,13 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       } else if (name === 'project') {
           // Project prompt already instructs to read files, but we can pre-fetch if needed.
           // For now, let the static prompt guide the agent to read.
+      } else if (name === 'review') {
+          const reviews = await controller.getReviewTasks();
+          contextData = JSON.stringify({ pending_reviews: reviews }, null, 2);
+      /** @trace TASK-079 (Verify Prompt) */
+      } else if (name === 'verify') {
+          const stats = await controller.getVerificationStats();
+          contextData = JSON.stringify(stats, null, 2);
       }
 
       return {
@@ -378,10 +410,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === 'loom_next') {
-      const result = await controller.getNextTask();
+      const list = args?.list === true;
+      const result = await controller.getNextTask(list);
       if (result.status === 'done') return { content: [{ type: 'text', text: 'All tasks completed.' }] };
       if (result.status === 'blocked') return { content: [{ type: 'text', text: `No actionable tasks. ${result.blockedCount} blocked.` }] };
-      return { content: [{ type: 'text', text: JSON.stringify(result.task, null, 2) }] };
+      return { content: [{ type: 'text', text: JSON.stringify(list ? result.tasks : result.task, null, 2) }] };
+    }
+
+    if (name === 'loom_list_reviews') {
+        const tasks = await controller.getReviewTasks();
+        if (tasks.length === 0) return { content: [{ type: 'text', text: 'No tasks in Review status.' }] };
+        return { content: [{ type: 'text', text: JSON.stringify(tasks, null, 2) }] };
+    }
+
+    if (name === 'loom_get_diff') {
+        const id = args?.id as string;
+        const summary = args?.summary === true;
+        const diff = await controller.getTaskDiff(id, summary ? 'summary' : 'full');
+        return { content: [{ type: 'text', text: diff }] };
     }
 
     if (name === 'loom_verify') {

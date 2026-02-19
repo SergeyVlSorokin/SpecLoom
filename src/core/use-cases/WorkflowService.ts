@@ -161,7 +161,10 @@ export class WorkflowService {
       this.db.upsertNode(newNode);
   }
 
-  async getDiff(taskId: string): Promise<string> {
+  /**
+   * @trace TASK-078 (Robust Git Diff)
+   */
+  async getDiff(taskId: string, mode: 'full' | 'summary' = 'full'): Promise<string> {
     const git = simpleGit(this.repoPath);
     try {
         const isRepo = await git.checkIsRepo();
@@ -169,13 +172,56 @@ export class WorkflowService {
             return "(Not a git repository)";
         }
         
-        // get diff of working directory + staged
-        const diff = await git.diff(); 
+        // 1. Get Committed Changes (via Trace)
+        const log = await git.log({'--grep': `Trace: ${taskId}`});
+        const commits = log.all;
+
+        // 2. Get Working Directory Changes (via File Scan? Or just all uncommitted?)
+        // Ideally we filter by @trace tag, but git diff doesn't support content filtering easily.
+        // We will include ALL uncommitted changes if the task is active? 
+        // Or we rely on 'simple' diff for working dir.
+        // Let's stick to: Committed (Trace) + Uncommitted (All/Staged).
+        // This assumes user is working on ONE task at a time for uncommitted changes.
+        
+        const workingDiff = await git.diff(); 
         const cachedDiff = await git.diff(['--cached']);
         
-        if (!diff && !cachedDiff) return "(No changes detected)";
+        if (mode === 'summary') {
+            let output = `Task: ${taskId}\n`;
+            
+            if (commits.length > 0) {
+                output += `\n--- Commits (${commits.length}) ---\n`;
+                commits.forEach(c => output += `- ${c.hash.substring(0,7)} ${c.message}\n`);
+            }
+            
+            if (workingDiff || cachedDiff) {
+                output += `\n--- Uncommitted Changes ---\n`;
+                // Parse diff to get filenames?
+                // git status --porcelain might be better.
+                const status = await git.status();
+                status.files.forEach(f => output += `- ${f.path} (${f.working_dir})\n`);
+            }
+            
+            if (commits.length === 0 && !workingDiff && !cachedDiff) return "(No changes found)";
+            return output;
+        }
+
+        // Full Diff Mode
+        let fullDiff = "";
         
-        return `--- Staged Changes ---\n${cachedDiff}\n\n--- Working Directory Changes ---\n${diff}`;
+        // Commits
+        for (const commit of commits) {
+            const show = await git.show([commit.hash]);
+            fullDiff += `\n--- Commit ${commit.hash.substring(0,7)} ---\n${show}\n`;
+        }
+        
+        // Working Dir
+        if (cachedDiff) fullDiff += `\n--- Staged Changes ---\n${cachedDiff}\n`;
+        if (workingDiff) fullDiff += `\n--- Working Directory Changes ---\n${workingDiff}\n`;
+        
+        if (!fullDiff) return "(No changes found)";
+        return fullDiff;
+
     } catch (e: any) {
         return `(Error getting diff: ${e.message})`;
     }

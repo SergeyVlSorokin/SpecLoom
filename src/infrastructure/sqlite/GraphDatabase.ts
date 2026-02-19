@@ -89,6 +89,13 @@ export class GraphDatabase {
     stmt.run(type);
   }
 
+  public deleteNode(id: string) {
+    const stmt = this.db.prepare('DELETE FROM nodes WHERE id = ?');
+    stmt.run(id);
+    const stmt2 = this.db.prepare('DELETE FROM links WHERE source_id = ? OR target_id = ?');
+    stmt2.run(id, id);
+  }
+
   public getTaskStatusCounts(): Record<string, number> {
     // We need to parse the JSON content to get the status field.
     // SQLite's JSON support (json_extract) would be ideal, but for better-sqlite3 without extensions, 

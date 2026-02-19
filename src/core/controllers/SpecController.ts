@@ -102,9 +102,9 @@ export class SpecController {
       return { message: `Task ${taskId} approved by ${reviewer}. Status: Done.` };
   }
 
-  public async getTaskDiff(taskId: string) {
+  public async getTaskDiff(taskId: string, mode: 'full' | 'summary' = 'full') {
       this.ensureInitialized();
-      return this.workflowService!.getDiff(taskId);
+      return this.workflowService!.getDiff(taskId, mode);
   }
 
   /**
@@ -182,11 +182,22 @@ export class SpecController {
     return { status: 'success', message: 'Specification synced to graph database.' };
   }
 
+  /**
+   * @trace TASK-076 (Persist Verification)
+   */
   public async runScenario(id: string, ui: UserInterface, interactive: boolean = true) {
     this.ensureInitialized();
     await this.engine!.sync();
     const runner = new ScenarioRunner(this.db!, ui, interactive);
-    return runner.run(id);
+    const result = await runner.run(id);
+    
+    // Persist result
+    if (result.status === 'PASS' || result.status === 'FAIL') {
+        const status = result.status === 'PASS' ? 'Pass' : 'Fail';
+        await this.engine!.updateScenarioResult(id, status);
+    }
+    
+    return result;
   }
 
   public async validate() {
@@ -201,10 +212,28 @@ export class SpecController {
     return this.engine!.getStatus();
   }
 
-  public async getNextTask() {
+  /**
+   * @trace TASK-074 (Task Listing)
+   */
+  public async getNextTask(list: boolean = false) {
     this.ensureInitialized();
     await this.engine!.sync();
-    return this.engine!.getPendingTasks();
+    return this.engine!.getPendingTasks(list);
+  }
+
+  public async getReviewTasks() {
+    this.ensureInitialized();
+    await this.engine!.sync();
+    return this.engine!.getReviewTasks();
+  }
+
+  /**
+   * @trace TASK-076 (Verification Stats)
+   */
+  public async getVerificationStats() {
+      this.ensureInitialized();
+      await this.engine!.sync();
+      return this.engine!.getVerificationStats();
   }
 
   public getInfo() {

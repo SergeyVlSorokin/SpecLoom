@@ -29,6 +29,33 @@ SpecLoom is a "Guardian" for your codebase. It enforces a strict V-Model (Requir
     loom complete TASK-001 # Releases lock and marks as Done/Review
     ```
 
+## Finding Work
+
+To see what to do next:
+
+*   **Recommendation:** `loom next` (Shows the single highest priority task)
+*   **List Options:** `loom next --list` (Shows all actionable pending tasks)
+
+## Reviewing Code
+
+Tasks with `verification_regime: Light` or `Strict` go to `Review` status upon completion.
+
+1.  **List Reviews:**
+    ```bash
+    loom review
+    ```
+
+2.  **Interactive Review:**
+    ```bash
+    loom review --interactive
+    # or
+    loom review --interactive -i
+    ```
+    This guides you through:
+    *   Selecting a task
+    *   Viewing the Diff
+    *   Approving (updates status to Done) or Rejecting
+
 ## CLI Reference
 
 ### Initialization
