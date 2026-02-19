@@ -117,7 +117,7 @@ export class WorkflowService {
              
         // Update DB for testability (mock persistence)
         // Store implementer ID if present in lock
-        const newContent = { ...taskNode.content, status: nextStatus };
+        const newContent: Record<string, any> = { ...taskNode.content, status: nextStatus };
         if (implementer) {
             newContent.implementer = implementer;
         }
