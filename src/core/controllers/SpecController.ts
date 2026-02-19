@@ -76,13 +76,16 @@ export class SpecController {
       return this.workflowService!.getContextBundle(taskId);
   }
 
-  public async startTask(taskId: string) {
+  public async startTask(taskId: string, implementerId?: string) {
       this.ensureInitialized();
       await this.engine!.sync();
-      await this.workflowService!.startTask(taskId);
+      await this.workflowService!.startTask(taskId, implementerId);
       return { message: `Task ${taskId} started. Context locked.` };
   }
 
+  /**
+   * @trace TASK-063 (Review Identity Check)
+   */
   public async completeTask(taskId: string) {
       this.ensureInitialized();
       await this.engine!.sync();
@@ -97,6 +100,11 @@ export class SpecController {
       await this.workflowService!.approveTask(taskId, reviewer);
       await this.engine!.updateTaskStatus(taskId, 'Done');
       return { message: `Task ${taskId} approved by ${reviewer}. Status: Done.` };
+  }
+
+  public async getTaskDiff(taskId: string) {
+      this.ensureInitialized();
+      return this.workflowService!.getDiff(taskId);
   }
 
   /**

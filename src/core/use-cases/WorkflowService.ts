@@ -2,7 +2,11 @@ import { GraphDatabase } from '../../infrastructure/sqlite/GraphDatabase.js';
 import { SpecNode } from '../domain/SpecNode.js';
 import { writeFileSync, existsSync, readFileSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { simpleGit } from 'simple-git';
 
+/**
+ * @trace TASK-063 (Identity Guardrails & Diff)
+ */
 export interface ContextBundle {
   task: any;
   requirements: any[];
@@ -73,7 +77,7 @@ export class WorkflowService {
     return bundle;
   }
 
-  async startTask(taskId: string): Promise<void> {
+  async startTask(taskId: string, implementerId?: string): Promise<void> {
     const taskNode = this.db.getNode(taskId);
     if (!taskNode) throw new Error(`Task ${taskId} not found`);
 
@@ -90,7 +94,7 @@ export class WorkflowService {
     const lockDir = join(this.repoPath, '.spec');
     if (!existsSync(lockDir)) mkdirSync(lockDir, { recursive: true });
 
-    writeFileSync(this.lockPath, JSON.stringify({ taskId, timestamp: Date.now() }));
+    writeFileSync(this.lockPath, JSON.stringify({ taskId, implementer: implementerId, timestamp: Date.now() }));
   }
 
   async completeTask(taskId: string): Promise<string> {
@@ -104,15 +108,22 @@ export class WorkflowService {
     let nextStatus = 'Done';
     const taskNode = this.db.getNode(taskId);
     if (taskNode) {
-        const regime = taskNode.content['verification_regime'];
-        if (regime && regime !== 'None') {
+        const regime = taskNode.content['verification_regime'] || 'Light'; // Default to Review
+        const implementer = content.implementer;
+
+        if (regime !== 'None') {
              nextStatus = 'Review';
-             
-             // Update DB for testability (mock persistence)
-             const newContent = { ...taskNode.content, status: 'Review' };
-             const newNode = new SpecNode(taskNode.id, taskNode.type, newContent);
-             this.db.upsertNode(newNode);
         }
+             
+        // Update DB for testability (mock persistence)
+        // Store implementer ID if present in lock
+        const newContent = { ...taskNode.content, status: nextStatus };
+        if (implementer) {
+            newContent.implementer = implementer;
+        }
+
+        const newNode = new SpecNode(taskNode.id, taskNode.type, newContent);
+        this.db.upsertNode(newNode);
     }
     
     unlinkSync(this.lockPath);
@@ -125,6 +136,10 @@ export class WorkflowService {
       
       if (taskNode.content.status !== 'Review') {
           throw new Error(`Task ${taskId} is not in Review status.`);
+      }
+
+      if (taskNode.content.implementer === reviewerId) {
+          throw new Error('Reviewer cannot be the same as the Implementer');
       }
 
       // Update status to Done
@@ -144,5 +159,25 @@ export class WorkflowService {
       const newContent = { ...taskNode.content, status: 'Done', reviewer: reviewerId };
       const newNode = new SpecNode(taskNode.id, taskNode.type, newContent);
       this.db.upsertNode(newNode);
+  }
+
+  async getDiff(taskId: string): Promise<string> {
+    const git = simpleGit(this.repoPath);
+    try {
+        const isRepo = await git.checkIsRepo();
+        if (!isRepo) {
+            return "(Not a git repository)";
+        }
+        
+        // get diff of working directory + staged
+        const diff = await git.diff(); 
+        const cachedDiff = await git.diff(['--cached']);
+        
+        if (!diff && !cachedDiff) return "(No changes detected)";
+        
+        return `--- Staged Changes ---\n${cachedDiff}\n\n--- Working Directory Changes ---\n${diff}`;
+    } catch (e: any) {
+        return `(Error getting diff: ${e.message})`;
+    }
   }
 }

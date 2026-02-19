@@ -9,7 +9,8 @@ Define `architecture_view` (VIEW), `api_contract` (API), `data_model` (DATA), an
 ## Protocol
 1.  **The "Views First" Rule:**
     *   Before defining APIs, you MUST update or create an `architecture_view` that provides context.
-    *   Ask: "Which subsystem owns this responsibility?"
+    *   Use 4+1 model to define views
+    *   Ask: "Which subsystem owns this responsibility?"; "What is the concern we need to address in view?";
 
 2.  **The ADR Mandate:**
     *   If you face a choice (e.g., SQL vs NoSQL, REST vs GraphQL), you **MUST** create an `ADR` (Architecture Decision Record).

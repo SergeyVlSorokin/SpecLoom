@@ -290,12 +290,29 @@ program
   .command('start')
   .description('Start a Task and lock active context')
   .argument('<id>', 'Task ID')
-  .action(async (id) => {
+  .option('--user <user>', 'Implementer ID', process.env.USER || process.env.USERNAME || 'unknown-user')
+  .action(async (id, options) => {
     try {
-        const result = await controller.startTask(id);
+        const result = await controller.startTask(id, options.user);
         console.log(result.message);
     } catch (error: any) {
         console.error('Start failed:', error.message);
+        process.exit(1);
+    } finally {
+        controller.dispose();
+    }
+  });
+
+program
+  .command('diff')
+  .description('Show git diff for the current task context')
+  .argument('<id>', 'Task ID')
+  .action(async (id) => {
+    try {
+        const diff = await controller.getTaskDiff(id);
+        console.log(diff);
+    } catch (error: any) {
+        console.error('Diff failed:', error.message);
         process.exit(1);
     } finally {
         controller.dispose();

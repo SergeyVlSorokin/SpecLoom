@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "rm -rf dist && tsc && cp -r src/assets dist/ && mkdir -p dist/src/core/prompts/standard_procedures && cp -r src/core/prompts/standard_procedures/* dist/src/core/prompts/standard_procedures/"
   },
   "repository": {
