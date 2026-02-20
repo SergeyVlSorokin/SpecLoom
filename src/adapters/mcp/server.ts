@@ -12,7 +12,7 @@ import { PromptFactory } from '../../core/prompts/PromptFactory.js';
 
 const projectRoot = process.cwd();
 const controller = new SpecController(projectRoot);
-const promptFactory = new PromptFactory(projectRoot);
+const promptFactory = new PromptFactory();
 
 const server = new Server(
   {

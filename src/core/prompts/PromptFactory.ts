@@ -1,15 +1,15 @@
 import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export class PromptFactory {
   private templatesPath: string;
 
-  constructor(projectRoot: string) {
-    this.templatesPath = join(projectRoot, 'src/core/prompts/standard_procedures');
-    // Fallback for runtime if src is not available (e.g. dist)
-    if (!existsSync(this.templatesPath)) {
-         this.templatesPath = join(projectRoot, 'dist/src/core/prompts/standard_procedures');
-    }
+  constructor() {
+    this.templatesPath = join(__dirname, 'standard_procedures');
   }
 
   public getPrompt(command: string): string {
@@ -20,8 +20,6 @@ export class PromptFactory {
 
     const filePath = join(this.templatesPath, filename);
     if (!existsSync(filePath)) {
-        // Fallback: try to find it in the project root if running from dist but templates are not copied
-        // ideally templates should be copied to dist/
         throw new Error(`Prompt template not found: ${filePath}`);
     }
 
