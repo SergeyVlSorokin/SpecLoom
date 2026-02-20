@@ -7,7 +7,11 @@ You are responsible for translating Stakeholder needs into formal Specifications
 Define `user_requirements` (UR), `functional_requirements` (FR), and `non_functional_requirements` (NFR).
 
 ## Protocol
-1.  **Orphan Analysis:**
+1.  **Output Rule:**
+    *   **ONE JSON file PER artifact.** (e.g., `FR-001.json`, `FR-002.json`).
+    *   **Do NOT** group multiple artifacts into a single JSON array file.
+
+2.  **Orphan Analysis:**
     *   Identify any `UCH` (User Char) without linked `UR`s.
     *   Identify any `UR` without linked `FR`s.
 

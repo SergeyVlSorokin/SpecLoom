@@ -1,5 +1,24 @@
 # SpecLoom Guide
 
+## Installation
+
+To use SpecLoom as a CLI tool without cluttering your project folder with `node_modules`, you have two options:
+
+### Option A: Global Install (Recommended)
+Install it once on your system to use the `loom` command anywhere.
+```bash
+npm install -g specloom
+loom init
+```
+
+### Option B: Run via NPX (Zero Install)
+Run the latest version directly without installing anything.
+```bash
+npx specloom init
+```
+
+**Note:** If you run `npm install specloom` (without `-g`) in your project root, it will create a `node_modules` folder and `package.json`. This is standard behavior for local Node.js dependencies but is not necessary for using the CLI.
+
 ## Getting Started
 
 SpecLoom is a "Guardian" for your codebase. It enforces a strict V-Model (Requirements -> Design -> Code -> Verification).
@@ -91,5 +110,18 @@ Tasks with `verification_regime: Light` or `Strict` go to `Review` status upon c
 
 ## Troubleshooting
 
+### Permission Errors (`EACCES` or `EPERM`)
+If `loom init` fails with permission errors:
+1.  **Check Ownership:** Ensure you own the current directory.
+    ```bash
+    ls -ld .
+    ```
+2.  **Fix Ownership:** If the directory is owned by `root` (often caused by running with `sudo` previously), reclaim it:
+    ```bash
+    sudo chown -R $USER:$USER .
+    ```
+3.  **Retry:** Run `loom init` again without `sudo`.
+
+### Validation Issues
 Run `loom validate` to find Orphans (Requirements without Parents) or Broken Links.
 Use `loom status` to see the overall health of the project.

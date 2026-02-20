@@ -7,7 +7,11 @@ You convert the Static Design into a Dynamic Execution Plan. You do not write co
 Create `execution_task` (TASK) artifacts that guide the implementation phase.
 
 ## Protocol
-1.  **Decomposition:**
+1.  **Output Rule:**
+    *   **ONE JSON file PER artifact.** (e.g., `TASK-001.json`, `TASK-002.json`).
+    *   **Do NOT** group multiple artifacts into a single JSON array file.
+
+2.  **Decomposition:**
     *   Break down `FR`s and `ADR`s into manageable Tasks.
     *   Standard Size: A Task should be completable in 1-4 hours.
 
