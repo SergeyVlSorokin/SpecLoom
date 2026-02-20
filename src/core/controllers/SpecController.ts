@@ -24,20 +24,23 @@ export class SpecController {
 
   constructor(private projectRoot: string) {
     this.initService = new InitService(projectRoot);
-    
-    // Lazy Initialization Strategy
-    // Only initialize DB-dependent services if the project is already initialized.
-    const dbDir = join(projectRoot, '.spec');
+    this._initializeServices();
+  }
+
+  private _initializeServices() {
+    if (this.db && this.engine) return; // Already initialized
+
+    const dbDir = join(this.projectRoot, '.spec');
     if (existsSync(dbDir)) {
         try {
             const dbPath = join(dbDir, 'graph.db');
             this.db = new GraphDatabase(dbPath);
-            this.engine = new SpecEngine(projectRoot, this.db);
+            this.engine = new SpecEngine(this.projectRoot, this.db);
             this.slicer = new ContextSlicer(this.db);
-            this.bundleService = new ContextBundleService(this.db, projectRoot);
+            this.bundleService = new ContextBundleService(this.db, this.projectRoot);
             this.guardian = new ProcessGuardian(this.db);
-            this.workflowService = new WorkflowService(this.db, projectRoot);
-            this.docGenerator = new DocGenerator(this.db, join(projectRoot, '.spec/core/templates'));
+            this.workflowService = new WorkflowService(this.db, this.projectRoot);
+            this.docGenerator = new DocGenerator(this.db, join(this.projectRoot, '.spec/core/templates'));
             this.stateAnalyzer = new StateAnalyzer(this.engine);
         } catch (e) {
             console.warn("Failed to initialize GraphDatabase (Run 'loom init' first):", e);
@@ -46,13 +49,20 @@ export class SpecController {
   }
 
   private ensureInitialized() {
+      // Lazy load attempt
+      if (!this.db || !this.engine) {
+          this._initializeServices();
+      }
+
       if (!this.db || !this.engine) {
           throw new Error("SpecLoom is not initialized. Run 'loom init' first.");
       }
   }
 
   public init(brownfieldPath?: string) {
-      return this.initService.init(brownfieldPath);
+      const result = this.initService.init(brownfieldPath);
+      this._initializeServices(); // Wake up services immediately
+      return result;
   }
 
   public async generateDocs(outDir?: string) {
