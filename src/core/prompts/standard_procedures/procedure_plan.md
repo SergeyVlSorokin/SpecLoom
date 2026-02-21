@@ -27,5 +27,7 @@ Create `execution_task` (TASK) artifacts that guide the implementation phase.
     *   Create `TASK-XXX`.
     *   Link to parent `FR`s and `ADR`s.
 
-5.  **Verification:**
-    *   Review the Plan with the user before committing to Execution.
+5.  **Summary & Approval Loop (MANDATORY):**
+    *   **Summarize:** List all created Tasks (ID + Title + Priority).
+    *   **Ask:** "Does this execution plan look complete? Please Approve, Correct, or Extend."
+    *   **Wait:** Do NOT proceed without explicit user confirmation.

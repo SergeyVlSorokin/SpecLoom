@@ -24,6 +24,7 @@ Define `user_requirements` (UR), `functional_requirements` (FR), and `non_functi
     *   Translate `UR`s into atomic `FR`s (Functional Requirements).
     *   **Traceability is Mandatory:** Every `FR` MUST trace to a `UR` or `BR`.
 
-4.  **Verification:**
-    *   Present the requirements to the user.
-    *   Ask: "Are these acceptance criteria testable?"
+4.  **Summary & Approval Loop (MANDATORY):**
+    *   **Summarize:** List all created artifacts (ID + Title).
+    *   **Ask:** "Do these capture your intent? Please Approve, Correct, or Extend."
+    *   **Wait:** Do NOT proceed to the next phase without explicit user confirmation.

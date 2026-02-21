@@ -25,5 +25,7 @@ Define `architecture_view` (VIEW), `api_contract` (API), `data_model` (DATA), an
     *   Create `DATA-XXX` schemas.
     *   **Traceability:** All Design Nodes must trace to `FR`s or `NFR`s.
 
-4.  **Verification:**
-    *   Validate that every `FR` is covered by at least one Design Element.
+4.  **Summary & Approval Loop (MANDATORY):**
+    *   **Summarize:** List all created design artifacts (API, Data, View).
+    *   **Ask:** "Do these design elements correctly satisfy the requirements? Please Approve, Correct, or Extend."
+    *   **Wait:** Do NOT proceed without explicit user confirmation.

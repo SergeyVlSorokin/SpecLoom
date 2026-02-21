@@ -9,6 +9,8 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { SpecController } from '../../core/controllers/SpecController.js';
 import { PromptFactory } from '../../core/prompts/PromptFactory.js';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 const projectRoot = process.cwd();
 const controller = new SpecController(projectRoot);
@@ -263,6 +265,12 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       } else if (name === 'project') {
           // Project prompt already instructs to read files, but we can pre-fetch if needed.
           // For now, let the static prompt guide the agent to read.
+      } else if (name === 'plan') {
+          const templatePath = join(projectRoot, '.spec/core/templates/tasks/feature.json');
+          if (existsSync(templatePath)) {
+              const template = readFileSync(templatePath, 'utf8');
+              contextData = `### MANDATORY TASK TEMPLATE (feature.json)\n${template}`;
+          }
       } else if (name === 'review') {
           const reviews = await controller.getReviewTasks();
           contextData = JSON.stringify({ pending_reviews: reviews }, null, 2);
