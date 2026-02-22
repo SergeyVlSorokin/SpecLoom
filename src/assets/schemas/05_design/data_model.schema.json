@@ -7,7 +7,7 @@
     "specification": {
       "type": "object",
       "properties": {
-        "type": { "enum": ["ODCS", "SQL_DDL"] },
+        "type": { "enum": ["ODCS", "SQL_DDL", "DBML", "DTO"] },
         "path": { "type": "string" }
       },
       "required": ["type", "path"]

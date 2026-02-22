@@ -7,6 +7,10 @@ This document defines the strict dependency graph for SpecLoom artifacts. It enf
 The arrows ($
 ightarrow$) represent "Traces To" (Depends On). If a parent node changes, all children are impacted.
 
+### 3. The Artifact Traceability Map
+
+This diagram defines the strict dependency graph for SpecLoom artifacts.
+
 ```mermaid
 graph TD
     subgraph Layer_0_Foundation ["0. Foundation & Context"]
@@ -57,6 +61,13 @@ graph TD
         TEST["Verification (tests)"] -.->|"@trace"| FR
         SCN[Test Scenario] -.->|"@trace"| FR
     end
+
+    subgraph Layer_6_Defects ["6. Defects & RCA"]
+        FRT[Fault Report] -.-> SCN
+        FRT -.-> FR
+        RCA[Root Cause] --> FRT
+        TASK_DEFECT[Defect Task] --> RCA
+    end
 ```
 
 ### Traceability Matrix
@@ -74,6 +85,9 @@ graph TD
 | **Functional Req (`FR`)** | UR, BR, NFR, CON, ASM | Architecture, Tasks, Code, Tests |
 | **ADR** | FR, NFR, CON, ASM | Tasks, Architecture Views |
 | **Execution Task** | FR, ADR, SYS | Sessions, Code Changes |
+| **Fault Report (`FRT`)** | SCN, FR | Root Cause (`RCA`) |
+| **Root Cause (`RCA`)** | FRT | Defect Resolution Tasks |
+
 
 ## 2. Definitions & Rules
 

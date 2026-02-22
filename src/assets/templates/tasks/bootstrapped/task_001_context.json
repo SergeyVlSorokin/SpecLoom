@@ -1,0 +1,27 @@
+{
+  "id": "TASK-001",
+  "title": "Establish Project Context",
+  "type": "process",
+  "routine": "Process",
+  "status": "Pending",
+  "priority": "High",
+  "description": "Define the Mission, Stakeholders, and Business Rules. This is the foundation of the project.",
+  "ai_instructions": "You MUST follow the Requirements Agent Protocol (`requirements_agent_prompt.md`). Focus on `CTX`, `STK`, and `BR` artifacts.",
+  "dependencies": [],
+  "trace_to": {
+    "system_requirements": ["SYS-DEFINE"]
+  },
+  "execution_steps": [
+    "Run 'loom start TASK-001'",
+    "Run 'loom context TASK-001'",
+    "Analyze 'product_context.json'",
+    "Create/Update 'STK-XXX' artifacts",
+    "Create/Update 'BR-XXX' artifacts",
+    "Run 'loom complete TASK-001'"
+  ],
+  "definition_of_done": [
+    "Mission Statement is clear",
+    "Key Stakeholders identified",
+    "Critical Business Rules documented"
+  ]
+}

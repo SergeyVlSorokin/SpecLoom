@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, existsSync, cpSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, cpSync, readdirSync, readFileSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -53,6 +53,30 @@ export class InitService {
         // Create Registry
         const registry = { entries: [] };
         writeFileSync(join(this.projectRoot, '.spec/data/00_infastructure/registry.json'), JSON.stringify(registry, null, 2));
+
+        // Bootstrap SYS-DEFINE (System Requirement for Process Tasks)
+        const sysDefine = {
+            id: "SYS-DEFINE",
+            type: "system_requirement",
+            title: "Process Definition",
+            description: "The system must follow the SpecLoom V-Model process."
+        };
+        writeFileSync(join(this.projectRoot, '.spec/data/00_infastructure/sys_define.json'), JSON.stringify(sysDefine, null, 2));
+
+        // Bootstrap Meta-Tasks
+        const bootstrappedTasksDir = join(this.projectRoot, '.spec/core/templates/tasks/bootstrapped');
+        if (existsSync(bootstrappedTasksDir)) {
+            const files = readdirSync(bootstrappedTasksDir);
+            for (const file of files) {
+                if (file.endsWith('.json')) {
+                    const taskContent = JSON.parse(readFileSync(join(bootstrappedTasksDir, file), 'utf-8'));
+                    writeFileSync(
+                        join(this.projectRoot, '.spec/data/06_execution', file),
+                        JSON.stringify(taskContent, null, 2)
+                    );
+                }
+            }
+        }
 
         // Create Brownfield Context if applicable
         if (brownfieldPath) {

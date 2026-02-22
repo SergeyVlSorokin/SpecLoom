@@ -40,6 +40,7 @@ export class PromptFactory {
       case 'context': return 'procedure_context.md';
       case 'next': return 'procedure_next.md';
       case 'review': return 'procedure_review.md';
+      case 'load': return 'procedure_load.md';
       default: return null;
     }
   }

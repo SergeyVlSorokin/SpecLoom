@@ -1,0 +1,29 @@
+{
+  "id": "TASK-002",
+  "title": "Define User & System Requirements",
+  "type": "process",
+  "routine": "Process",
+  "status": "Pending",
+  "priority": "High",
+  "description": "Elicit and specify User Needs (UR) and System Functions (FR).",
+  "ai_instructions": "You MUST follow the Requirements Agent Protocol (`requirements_agent_prompt.md`). Focus on `UCH`, `UR`, `FR`, and `SCN` artifacts.",
+  "dependencies": ["TASK-001"],
+  "trace_to": {
+    "system_requirements": ["SYS-DEFINE"]
+  },
+  "execution_steps": [
+    "Run 'loom start TASK-002'",
+    "Run 'loom context TASK-002'",
+    "Identify User Characteristics (UCH)",
+    "Capture User Requirements (UR)",
+    "Derive Functional Requirements (FR)",
+    "Create Test Scenarios (SCN) for each FR",
+    "Run 'loom complete TASK-002'"
+  ],
+  "definition_of_done": [
+    "All URs trace to Stakeholders",
+    "All FRs trace to URs",
+    "All FRs have at least one SCN",
+    "Validation passes (No Orphans)"
+  ]
+}

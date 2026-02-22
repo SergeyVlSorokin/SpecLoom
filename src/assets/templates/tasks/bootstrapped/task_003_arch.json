@@ -1,0 +1,29 @@
+{
+  "id": "TASK-003",
+  "title": "Design System Architecture",
+  "type": "process",
+  "routine": "Process",
+  "status": "Pending",
+  "priority": "High",
+  "description": "Define the structural design (Views), interfaces (API), and data models (DATA).",
+  "ai_instructions": "You MUST follow the Architecture Agent Protocol (`architecture_agent_prompt.md`). Ensure 4+1 Views coverage.",
+  "dependencies": ["TASK-002"],
+  "trace_to": {
+    "system_requirements": ["SYS-DEFINE"]
+  },
+  "execution_steps": [
+    "Run 'loom start TASK-003'",
+    "Run 'loom context TASK-003'",
+    "Create Architecture Views (VIEW)",
+    "Define API Contracts (API)",
+    "Define Data Models (DATA)",
+    "Document Decisions (ADR)",
+    "Run 'loom complete TASK-003'"
+  ],
+  "definition_of_done": [
+    "All 4+1 Views present",
+    "APIs trace to FRs",
+    "Data Models defined (DB & DTO)",
+    "Validation passes"
+  ]
+}

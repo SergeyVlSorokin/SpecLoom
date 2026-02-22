@@ -237,3 +237,28 @@ In scenarios where a Task needs to be reset, paused, or manually adjusted outsid
     *   Reverting a task to `Pending` if started by mistake.
     *   Moving a task to `Review` without triggering the full completion logic (e.g., for partial updates).
     *   **Warning:** This bypasses some workflow guards. Use with caution.
+
+## 17. Defect Resolution Protocol
+
+Defects are handled through a strict **Fault Report -> Root Cause -> Task** cycle to ensure that failures are not just patched, but understood and eliminated at the source.
+
+### A. Criteria for Fault Reporting
+Create a **Fault Report (FRT)** ONLY when:
+1.  **Verification Failure:** A Test Scenario (`SCN`) fails during the `Verify` phase.
+2.  **Requirement Violation:** The system behavior contradicts a `FR`, `NFR`, or `BR`.
+3.  **Critical Incident:** A production outage or severe bug.
+
+### B. The RCA Mandate
+**Rule:** You CANNOT start a Task to fix a Fault Report without a linked **Root Cause Analysis (RCA)**.
+*   **Why?** "Quick fixes" often mask deeper architectural flaws.
+*   **Procedure:**
+    1.  Create `FRT-XXX` describing the failure.
+    2.  Perform the "Five Whys" analysis.
+    3.  Create `RCA-XXX` documenting the root cause and linking to `FRT-XXX`.
+    4.  Create `TASK-XXX` (Type: `Defect_Resolution`) linked to `RCA-XXX`.
+
+### C. The Closed Loop
+The defect is considered "Resolved" ONLY when:
+1.  The `Corrective Action Plan` (Task) is Complete.
+2.  The original `Fault Report` is verified as Fixed.
+3.  A **Regression Test** is added to the suite.

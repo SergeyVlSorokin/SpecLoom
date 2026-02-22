@@ -9,7 +9,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { SpecController } from '../../core/controllers/SpecController.js';
 import { PromptFactory } from '../../core/prompts/PromptFactory.js';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 const projectRoot = process.cwd();
@@ -222,8 +222,9 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
       { name: 'project', description: 'Get project context summary' },
       { name: 'status', description: 'Get project health and status' },
       { name: 'context', description: 'Get context for a specific task or node', arguments: [{ name: 'id', description: 'Artifact ID', required: true }] },
-      { name: 'next', description: 'Get next actionable task' },
+      { name: 'next', description: 'Get next actionable task', arguments: [{ name: 'list', description: 'If true, returns a list of all actionable tasks' }] },
       { name: 'review', description: 'Review completed tasks (Smart Mode)' },
+      { name: 'load', description: 'Bootstrap SpecLoom session and get next step' },
     ]
   };
 });
@@ -271,13 +272,98 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
               const template = readFileSync(templatePath, 'utf8');
               contextData = `### MANDATORY TASK TEMPLATE (feature.json)\n${template}`;
           }
+      } else if (name === 'next') {
+          // Always return a list by default for better visibility
+          const list = true;
+          const result = await controller.getNextTask(list);
+          if (result.status === 'done') contextData = 'All tasks completed.';
+          else if (result.status === 'blocked') contextData = `No actionable tasks. ${result.blockedCount} blocked.`;
+          else contextData = JSON.stringify(result.tasks, null, 2);
       } else if (name === 'review') {
           const reviews = await controller.getReviewTasks();
           contextData = JSON.stringify({ pending_reviews: reviews }, null, 2);
+      /** @trace TASK-080 (Start Prompt) */
+      } else if (name === 'load') {
+          if (existsSync(join(projectRoot, '.spec'))) {
+              try {
+                  const status = await controller.getStatus();
+                  const next = await controller.getNextTask(false);
+                  const info = controller.getInfo();
+                  
+                  // Load Product Context
+                  let productContext = {};
+                  try {
+                      const pcPath = join(projectRoot, '.spec/data/01_context/product_context.json');
+                      if (existsSync(pcPath)) {
+                          productContext = JSON.parse(readFileSync(pcPath, 'utf8'));
+                      }
+                  } catch (e) { productContext = { error: "Could not load product_context.json" }; }
+
+                  // Load ALL Protocols dynamically
+                  const protocols: Record<string, string> = {};
+                  const protocolPath = join(projectRoot, '.spec/core/protocol');
+                  
+                  if (existsSync(protocolPath)) {
+                      const files = readdirSync(protocolPath).filter(f => f.endsWith('.md'));
+                      for (const file of files) {
+                          protocols[file] = readFileSync(join(protocolPath, file), 'utf-8');
+                      }
+                  }
+
+                  contextData = JSON.stringify({
+                      system_info: info,
+                      system_status: status,
+                      project_context: productContext,
+                      next_recommendation: next,
+                      protocols: protocols
+                  }, null, 2);
+              } catch (e: any) {
+                  contextData = `Error initializing load context: ${e.message}`;
+              }
+          }
       /** @trace TASK-079 (Verify Prompt) */
       } else if (name === 'verify') {
           const stats = await controller.getVerificationStats();
           contextData = JSON.stringify(stats, null, 2);
+
+      // --- PHASE PROMPTS (Dual-Stack: Protocol + Procedure) ---
+      } else if (['req', 'arch', 'plan', 'impl', 'verify'].includes(name)) {
+          // Map command to protocol filename
+          const protocolMap: Record<string, string> = {
+              'req': 'requirements_agent_prompt.md',
+              'arch': 'architecture_agent_prompt.md',
+              'plan': 'planner_agent_prompt.md',
+              'impl': 'implementation_agent_prompt.md',
+              'verify': 'verification_agent_prompt.md'
+          };
+          
+          const protocolFile = protocolMap[name]!;
+          let protocolContent = "Protocol not found. Please ensure .spec/core/protocol or src/assets/protocol exists.";
+
+          // Priority 1: Project-specific protocol
+
+          // Priority 1: Project-specific protocol
+          const projectProtocolPath = join(projectRoot, '.spec/core/protocol', protocolFile);
+          if (existsSync(projectProtocolPath)) {
+              protocolContent = readFileSync(projectProtocolPath, 'utf-8');
+          } 
+          // Priority 2: Built-in default protocol (from assets)
+          else {
+              // In production, assets are in dist/src/assets/protocol
+              // In dev, they are in src/assets/protocol
+              const builtInPath = join(__dirname, '../../../../src/assets/protocol', protocolFile); // Adjusted relative path from dist/src/adapters/mcp/server.js
+              if (existsSync(builtInPath)) {
+                  protocolContent = readFileSync(builtInPath, 'utf-8');
+              } else {
+                  // Fallback for dev environment structure
+                  const devPath = join(projectRoot, 'src/assets/protocol', protocolFile);
+                  if (existsSync(devPath)) {
+                      protocolContent = readFileSync(devPath, 'utf-8');
+                  }
+              }
+          }
+
+          contextData = `### ACTIVE PROTOCOL (The Rules)\n${protocolContent}`;
       }
 
       return {

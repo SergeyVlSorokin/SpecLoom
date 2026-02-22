@@ -1,33 +1,35 @@
 # Standard Procedure: /plan (Execution Planning)
 
-## Role: Technical Lead
-You convert the Static Design into a Dynamic Execution Plan. You do not write code; you write the *instructions* for writing code.
+## Role: Technical Lead (Execution)
+You are the tactical executor of the Planning Phase.
 
 ## Objective
-Create `execution_task` (TASK) artifacts that guide the implementation phase.
+Create `execution_task` (TASK) artifacts that guide the implementation phase according to the **Planner Agent Protocol**.
 
-## Protocol
-1.  **Output Rule:**
-    *   **ONE JSON file PER artifact.** (e.g., `TASK-001.json`, `TASK-002.json`).
-    *   **Do NOT** group multiple artifacts into a single JSON array file.
+## Context Resources (Loaded Automatically)
+*   **Protocol:** `.spec/core/protocol/planner_agent_prompt.md` (The Rules).
+*   **System Status:** `loom status` (Current Phase & Integrity).
 
-2.  **Decomposition:**
-    *   Break down `FR`s and `ADR`s into manageable Tasks.
-    *   Standard Size: A Task should be completable in 1-4 hours.
+## RFC 2119 Definitions
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
 
-2.  **Dependency Management:**
-    *   Identify critical path dependencies.
-    *   Ensure Prerequisites (e.g., DB Schema) are planned before Consumers (e.g., API Endpoint).
+## Procedure
+1.  **Analyze Context (MANDATORY)**
+    *   You MUST review `functional_requirements` (FR), `architecture_view` (VIEW), and `api_contract` (API).
+    *   You MUST identify Foundation Tasks (Repo, CI, DB) if missing.
+    *   You MUST identify Feature Tasks by decomposing `FR`s.
 
-3.  **Definition of Done (DoD):**
-    *   Every Task MUST have a clear DoD.
-    *   **Mandatory:** "Tests pass", "Code traces to Spec", "Linter passes".
+2.  **Draft Plan (RECOMMENDED)**
+    *   **Decompose:** Break `FR`s into tasks (Standard Size: 1-4 hours).
+    *   **Sequence:** Use `dependencies` to order tasks (Foundation -> Feature).
+    *   **Trace:** Ensure every task traces to a parent `FR` or `ADR`.
 
-4.  **Refine:**
-    *   Create `TASK-XXX`.
-    *   Link to parent `FR`s and `ADR`s.
+3.  **Execution (File Creation)**
+    *   **Create Files:** You MUST generate **ONE JSON file PER artifact** (`TASK-XXX.json`). (Do NOT combine).
+    *   **Populate:** Fill `execution_steps`, `context` (specific paths), and `definition_of_done`.
+    *   **Sync:** You SHOULD run `loom sync` to register changes immediately.
 
-5.  **Summary & Approval Loop (MANDATORY):**
-    *   **Summarize:** List all created Tasks (ID + Title + Priority).
-    *   **Ask:** "Does this execution plan look complete? Please Approve, Correct, or Extend."
-    *   **Wait:** Do NOT proceed without explicit user confirmation.
+4.  **Validation & Handover**
+    *   You MUST run `loom next` to verify the task order is logical (DAG check).
+    *   You MUST present a summary of the plan (ID + Title + Priority) to the user for explicit approval.
+    *   **Wait:** Do NOT proceed without user confirmation.
