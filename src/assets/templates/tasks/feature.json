@@ -7,12 +7,13 @@
     "Create/Update Test File (Red Phase)",
     "Implement Code in src/ (Green Phase) - MUST add @trace <task_id>",
     "Run Tests to verify (Refactor Phase)",
+    "Execute the command defined in tdd_cycle.verification_command and ensure the output indicates a passing state BEFORE calling loom_complete.",
     "Run 'loom complete <task_id>'"
   ],
   "definition_of_done": [
     "Tests pass",
     "All modified source files have @trace annotation",
-    "loom validate passes (No Ghost Code)"
+    "loom validate passes (Checks Traces/Metadata only, DOES NOT run code tests)"
   ],
   "tdd_cycle": {
     "test_file": "tests/path/to/test.ts",

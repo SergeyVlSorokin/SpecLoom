@@ -6,11 +6,13 @@
     "Modify JSON artifacts in .spec/data/",
     "Run 'loom sync' to update Graph DB",
     "Run 'loom validate' to check for orphans",
+    "Ensure all design constraints and rules are satisfied BEFORE calling loom_complete.",
     "Run 'loom complete <task_id>'"
   ],
   "definition_of_done": [
     "Artifacts updated in Registry",
     "Graph Database is synced",
-    "No broken links or orphans introduced"
+    "No broken links or orphans introduced",
+    "loom validate passes (Checks Traces/Metadata only, DOES NOT run code tests)"
   ]
 }

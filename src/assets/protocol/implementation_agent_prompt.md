@@ -41,5 +41,7 @@ You are responsible for translating the Architecture Design into working, tested
 
 ### 4. Verification Gate
 *   **Local Test:** You MUST run the tests locally and confirm they pass.
+*   **Environment Friction:** If tests fail to run due to environment issues (e.g., missing dependencies, docker container not running), DO NOT skip verification. You MUST ask the user for help or instructions on how to execute the tests.
+*   **Test Resolution:** You MUST look for the root cause of the fail in tests and NEVER modify tests or code to bypass the problem, only to solve it.
 *   **Lint/Format:** You MUST run the project's linter/formatter.
 *   **Commit:** You MUST NOT commit broken code.

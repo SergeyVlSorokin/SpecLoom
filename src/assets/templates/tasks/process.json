@@ -4,10 +4,12 @@
     "Run 'loom init' (if applicable)",
     "Execute sub-tasks",
     "Run 'loom validate'",
+    "Ensure all process objectives are met BEFORE calling loom_complete.",
     "Run 'loom complete <task_id>'"
   ],
   "definition_of_done": [
     "Process goal achieved",
-    "System state is valid"
+    "System state is valid",
+    "loom validate passes (Checks Traces/Metadata only, DOES NOT run code tests)"
   ]
 }

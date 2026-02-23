@@ -43,7 +43,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'loom_validate',
-        description: 'Validate specification integrity',
+        description: 'Validate specification metadata integrity (Checks Traces only, DOES NOT run code tests)',
         inputSchema: { type: 'object', properties: {} },
       },
       {
