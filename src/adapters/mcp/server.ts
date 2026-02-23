@@ -10,7 +10,11 @@ import {
 import { SpecController } from '../../core/controllers/SpecController.js';
 import { PromptFactory } from '../../core/prompts/PromptFactory.js';
 import { readFileSync, existsSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const projectRoot = process.cwd();
 const controller = new SpecController(projectRoot);
