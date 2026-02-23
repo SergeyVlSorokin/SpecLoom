@@ -54,7 +54,7 @@ Within any given Stage, the Agent follows this loop:
     *   **Loop Check:** "Are there more [Items]?" Do not proceed on a single sample unless confirmed.
 2.  **Refine (Formalize):**
     *   Generate JSON artifact.
-    *   Update `registry.json` with new ID and Trace links.
+    *   Run `loom sync` to automatically update `registry.json` with the new ID and Trace links. Never edit `registry.json` manually.
 3.  **Verify (Sign-off):**
     *   Render the artifact using `core/templates`.
     *   Present to user.
@@ -109,7 +109,7 @@ Orphans are not the problem to solve, it ia indicators or not resolved needs. Do
 ## 7. New requirements in brownfield
 Add requirement and ensure full traceability to the not-done features
 1. **Create a new artifact:** Classify request and create a new artifact
-2. **Sync registry:** Register artifacts and sync database
+2. **Sync registry:** Run `loom sync` to automatically register new artifacts and sync the database.
 3. **Resolve orphanage:** New artifacts are not traceable and have to be solved in through Fix orphanage protocol
 4. **Check logical consistency:** In case of requirements conflicts ask user for clarification and resolvance. Do not tolerate logical inconsistensy.
 
