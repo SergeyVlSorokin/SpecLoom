@@ -18,6 +18,8 @@
     "Define API Contracts (API)",
     "Define Data Models (DATA)",
     "Document Decisions (ADR)",
+    "Ask user to run /handshake to agree on complete Architecture (never handshake by itself)",
+    "Ask user for confirmation to complete task",
     "Run 'loom complete TASK-003'"
   ],
   "definition_of_done": [

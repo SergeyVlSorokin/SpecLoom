@@ -82,7 +82,32 @@
        "properties": {
            "relevant_files": { "type": "array", "items": { "type": "string" } }
        }
+    },
+    "design_output": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Required for Design routine: The expected artifact IDs to be created or modified."
     }
   },
-  "required": ["id", "title", "type", "trace_to", "status", "execution_steps", "definition_of_done"]
+  "required": ["id", "title", "type", "trace_to", "status", "execution_steps", "definition_of_done"],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "routine": { "const": "Feature" } },
+        "required": ["routine"]
+      },
+      "then": {
+        "required": ["tdd_cycle", "verification_regime"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "routine": { "const": "Design" } },
+        "required": ["routine"]
+      },
+      "then": {
+        "required": ["design_output"]
+      }
+    }
+  ]
 }

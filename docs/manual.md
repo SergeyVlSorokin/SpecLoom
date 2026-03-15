@@ -75,6 +75,37 @@ Tasks with `verification_regime: Light` or `Strict` go to `Review` status upon c
     *   Viewing the Diff
     *   Approving (updates status to Done) or Rejecting
 
+## CI/CD Integration
+<!-- @trace TASK-069 -->
+
+SpecLoom can be integrated into your CI/CD pipeline to enforce the V-Model at the Pull Request level. We provide a GitHub Action for easy integration.
+
+### GitHub Action
+
+Create a workflow file (e.g., `.github/workflows/specloom-validate.yml`) in your repository:
+
+```yaml
+name: "SpecLoom Validation"
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run SpecLoom Validate
+        uses: specloom/action-validate@main
+```
+
+Alternatively, you can run it via `npx`:
+
+```bash
+npx specloom validate --ci
+```
+
 ## CLI Reference
 
 ### Initialization

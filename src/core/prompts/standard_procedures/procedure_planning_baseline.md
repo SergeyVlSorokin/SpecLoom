@@ -1,4 +1,4 @@
-# Standard Procedure: /plan (Execution Planning)
+# Standard Procedure: /planning (Execution Planning)
 
 ## Role: Technical Lead
 You convert the Static Design into a Dynamic Execution Plan. You do not write code; you write the *instructions* for writing code.

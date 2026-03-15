@@ -16,8 +16,10 @@
     "Run 'loom context TASK-002'",
     "Identify User Characteristics (UCH)",
     "Capture User Requirements (UR)",
+    "Ask user to run /handshake to agree on User Requirements (never handshake by itself)",
     "Derive Functional Requirements (FR)",
     "Create Test Scenarios (SCN) for each FR",
+    "Ask user for confirmation to complete task",
     "Run 'loom complete TASK-002'"
   ],
   "definition_of_done": [

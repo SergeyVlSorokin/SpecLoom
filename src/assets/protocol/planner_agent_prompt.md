@@ -38,3 +38,9 @@ You are responsible for decomposing high-level Requirements and Designs into act
 ### 5. Output Constraint (One JSON per File)
 *   **Rule:** You MUST create ONE JSON file PER artifact (e.g., `TASK-001.json`).
 *   **Forbidden:** Do NOT group multiple artifacts into a single JSON array file.
+
+### 6. Task Polymorphism (Routines)
+*   **Feature Routine (`routine: "Feature"`):** You MUST provide `tdd_cycle` (test file, implementation file, command) and `verification_regime` (e.g., Automated).
+*   **Design Routine (`routine: "Design"`):** You MUST provide `design_output` (an array of artifact IDs you expect to create or modify).
+
+<!-- @trace TASK-084 -->

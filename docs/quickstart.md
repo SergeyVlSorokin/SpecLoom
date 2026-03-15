@@ -1,6 +1,6 @@
-# SpecLoom Quickstart: Agent-First Compliance
+# SpecLoom Quickstart: The Hybrid Workflow
 
-This guide is for developers and AI agents who want to set up SpecLoom quickly.
+This guide is for developers and AI agents who want to set up SpecLoom quickly to enforce the Spec-Driven Development (SDD) process using the Hybrid Workflow paradigm.
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ This guide is for developers and AI agents who want to set up SpecLoom quickly.
 
 ## 1. Installation
 
-Run the following command in your project root:
+Run the following command to install the CLI tool globally:
 
 ```bash
 npm install -g specloom
@@ -25,74 +25,44 @@ loom init --greenfield
 loom init --brownfield .
 ```
 
-This creates the `.spec/` directory structure.
+This creates the `.spec/` directory structure containing the system requirements, foundational context, and core protocols.
 
-## 3. The Workflow (Happy Path)
+## 3. The Hybrid Workflow (Human-AI Collaboration)
 
-### Step A: Check Status
+SpecLoom works best when an AI agent handles the heavy lifting via MCP Tools while humans make strategic decisions at Anchor Points.
 
-See where you are in the V-Model.
-
-```bash
-loom status
-```
-
-### Step B: Get Next Task
-
-Ask SpecLoom what to do next.
-
-```bash
-loom next
-```
-
-### Step C: Start Task
-
-Lock the context for the assigned task (e.g., `TASK-001`).
-
-```bash
-loom start TASK-001
-```
-
-### Step D: Get Context
-
-Retrieve the requirements, design, and code relevant to the task.
-
-```bash
-loom context TASK-001 > context.json
-```
-
-### Step E: Implement & Verify
-
-Write your code. Run your tests.
-
-### Step F: Complete Task
-
-Mark the task as done (or ready for review).
-
-```bash
-loom complete TASK-001
-```
+### For Humans: Asynchronous Workflow
+1.  **Initiation:** Human runs `/load` to load the current state of the environment into the chat.
+2.  **Product Definition:** Product Owner uses `/vision` and Analyst uses `/req`. AI drafts the required `UR` and `FR` artifacts.
+3.  **Handshake 1:** Human runs `/handshake` to review the drafts and agree on the Product Anchor.
+4.  **Architecture:** Developer runs `/arch`. AI drafts architecture views and API contracts based on the approved requirements.
+5.  **Handshake 2:** Human runs `/handshake` to agree on the Architecture Anchor.
+6.  **Execution:** PO reprioritizes the backlog using `/prioritize`. Developers run `/impl` to get the next coding task.
 
 ## 4. MCP Integration (For AI Agents)
 
-To use SpecLoom as a "Brain" for your AI agent (Cursor, Windsurf, Cline):
+To use SpecLoom as a "Brain" for your AI agent (Cursor, Windsurf, Cline), you must attach the MCP server to your local workspace.
 
-1. **Configure MCP:** Add the following to your agent's config:
+### Standard Configuration
 
-    ```json
-    {
-      "mcpServers": {
-        "specloom": {
-          "command": "npx",
-          "args": ["-y", "specloom", "serve"]
-        }
-      }
+Add the following to your agent's configuration file:
+
+```json
+{
+  "mcpServers": {
+    "specloom": {
+      "command": "npx",
+      "args": ["-y", "specloom", "loom-server", "--dir", "."],
+      "env": {}
     }
-    ```
+  }
+}
+```
 
-2. **Ask the Agent:** "Check `loom_next` and implement the task."
+*Note: The `--dir .` argument ensures the server initializes in the correct working directory of the project, not the IDE's application directory.*
 
 ## 5. Troubleshooting
 
 * **Orphans?** Run `loom validate` to find missing links.
 * **Locked?** Run `loom status` to see who holds the lock.
+* **What's Next?** If stuck, run `/load` via MCP to have the AI suggest the next immediate action based on the state machine.

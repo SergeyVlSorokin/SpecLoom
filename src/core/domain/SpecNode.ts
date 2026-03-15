@@ -47,7 +47,10 @@ export class SpecNode {
   }
 
   private calculateHash(): string {
-    const str = JSON.stringify(this.content);
+    const clone = { ...this.content };
+    delete clone.last_agreed_hash;
+    delete clone.handshake_state;
+    const str = JSON.stringify(clone);
     return createHash('sha256').update(str).digest('hex');
   }
 }

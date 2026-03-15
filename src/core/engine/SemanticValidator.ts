@@ -122,17 +122,23 @@ export class SemanticValidator {
               orphans.push(`${id} (Lacks Driver: UR/BR/NFR/CON)`);
           }
 
-          // Check for Hollow Requirements (No Design Trace) - TASK-040
-          const hasDesignTrace = node.content.trace_to?.design_nodes?.length > 0;
+          // Check for Hollow Requirements (No Design Trace) - TASK-040 & TASK-085
+          // We check if any incoming edge is from a Design node (API, VIEW, DATA, ADR, execution_task)
+          const children = this.db.getTraceSources(id);
+          const childNodes = children.map(cid => this.db.getNode(cid));
+          const hasDesignTrace = childNodes.some(c => 
+             c && ['api_contract', 'architecture_view', 'data_model', 'adr', 'execution_task'].includes(c.type)
+          );
+          
           if (!hasDesignTrace) {
-              // We also accept if there are incoming traces from Design nodes (Legacy/Back-compat)
-              // But strictly per TASK-040, we want the FR to explicitly state its design.
-              // Let's be strict for now as requested.
               orphans.push(`${id} (Hollow: No Design Trace)`);
           }
 
-          // Check for Untested Requirements (No Verification Plan) - TASK-039
-          const hasVerification = node.content.trace_to?.verification_plans?.length > 0;
+          // Check for Untested Requirements (No Verification Plan) - TASK-039 & TASK-085
+          const hasVerification = childNodes.some(c => 
+             c && ['test_scenario', 'verification'].includes(c.type)
+          ) || node.content.trace_to?.verification_plans?.length > 0; // Fallback to explicit list if any
+
           if (!hasVerification) {
               orphans.push(`${id} (Untested: No Verification Plan)`);
           }

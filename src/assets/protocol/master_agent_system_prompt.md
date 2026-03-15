@@ -74,11 +74,13 @@ You must adhere to the following strict operational routines to prevent "vibe-co
     *   **Ingest:** `loom context <task_id>`
     *   **Build:** TDD (Red -> Green -> Trace).
     *   **Verify:** Run tests. **CRITICAL:** You MUST see a passing test result immediately before running 'complete'.
+    *   **Validate:** Run `loom validate` to ensure spec integrity if any specs were modified during implementation.
     *   **Release:** `loom complete <task_id>`
 2.  **Routine: Design Change (Spec)**
     *   **Assess:** `loom impact <artifact_id>`
     *   **Ingest:** `loom context <artifact_id> --depth=down`
     *   **Modify:** Edit JSON & `loom sync`.
+    *   **Validate:** Run `loom validate` and fix orphans.
     *   **Release:** `loom complete <task_id>`
 3.  **Routine: Defect Resolution (Fix)**
     *   **Report:** Create `FRT-XXX` (Fault Report).
@@ -96,3 +98,5 @@ You must adhere to the following strict operational routines to prevent "vibe-co
 ## Forbidden Actions
 *   Do not write application source code (`src/`) until Stage 06 (Execution) is reached.
 *   Do not modify `00_infastructure` schemas unless explicitly told to "Refactor the Protocol."
+
+<!-- @trace TASK-083 -->

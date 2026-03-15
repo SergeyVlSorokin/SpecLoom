@@ -4,13 +4,21 @@ import { createInterface } from 'readline';
 import { SpecController } from '../../core/controllers/SpecController.js';
 
 const program = new Command();
-const projectRoot = process.cwd();
-const controller = new SpecController(projectRoot);
 
 program
   .name('loom')
   .description('SpecLoom CLI - Spec-Driven Development Guardian')
-  .version('1.0.0');
+  .version('1.0.0')
+  .option('--dir <path>', 'Override the project root directory (defaults to current working directory)');
+
+import { resolve } from 'path';
+
+// Helper to get controller with potentially overridden directory
+const getController = () => {
+    const opts = program.opts();
+    const projectRoot = opts.dir ? resolve(opts.dir) : process.cwd();
+    return new SpecController(projectRoot);
+};
 
 program
   .command('init')
@@ -19,13 +27,14 @@ program
   .option('--greenfield', 'Start a new project from scratch')
   .action(async (options) => {
     try {
-        const result = controller.init(options.brownfield);
+        // @trace TASK-068
+        const result = await getController().init(options.brownfield, options.greenfield);
         console.log(result.message);
     } catch (error: any) {
         console.error('Init failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
@@ -37,13 +46,13 @@ program
   .option('--title <title>', 'Title')
   .action(async (file, options) => {
     try {
-      const result = await controller.importReference(file, options.id, options.title);
+      const result = await getController().importReference(file, options.id, options.title);
       console.log(result.message);
     } catch (error: any) {
       console.error('Import failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -52,13 +61,13 @@ program
   .description('Sync JSON artifacts to the graph database')
   .action(async () => {
     try {
-      const result = await controller.sync();
+      const result = await getController().sync();
       console.log(result.message);
     } catch (error: any) {
       console.error('Sync failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -67,7 +76,7 @@ program
   .description('Show current V-Model status and progress')
   .action(async () => {
     try {
-      const status = await controller.getStatus();
+      const status = await getController().getStatus();
       
       console.log('--- Plan Status (The Guiding Star) ---');
       const totalTasks = Object.values(status.planStatus).reduce((a, b) => a + b, 0);
@@ -80,7 +89,7 @@ program
       });
 
       console.log('\n--- Verification Status ---');
-      const vStats = await controller.getVerificationStats();
+      const vStats = await getController().getVerificationStats();
       console.log(`Passed: ${vStats.passed} | Failed: ${vStats.failed} | Untested: ${vStats.untested} (Total: ${vStats.total})`);
 
       console.log('\n--- V-Model Artifacts ---');
@@ -100,7 +109,7 @@ program
       console.error('Status check failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -110,7 +119,7 @@ program
   .option('-l, --list', 'List all pending actionable tasks')
   .action(async (options) => {
     try {
-      const result = await controller.getNextTask(options.list);
+      const result = await getController().getNextTask(options.list);
       
       if (result.status === 'done') {
         console.log('All tasks completed! The plan is fulfilled.');
@@ -154,7 +163,7 @@ program
       console.error('Next task retrieval failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -162,7 +171,7 @@ program
   .command('info')
   .description('Show tool configuration and environment info')
   .action(() => {
-      const info = controller.getInfo();
+      const info = getController().getInfo();
       console.log('--- SpecLoom Environment ---');
       console.log(`Project Root: ${info.projectRoot}`);
       console.log(`Database:     ${info.dbPath}`);
@@ -181,7 +190,7 @@ program
           console.log(`  Available: ${info.templates.available.join(', ')}`);
       }
       
-      controller.dispose();
+      getController().dispose();
   });
 
 program
@@ -191,13 +200,13 @@ program
   .requiredOption('--status <status>', 'New status (Pending, In Progress, Done, Verified)')
   .action(async (options) => {
     try {
-      const result = await controller.updateTaskStatus(options.id, options.status);
+      const result = await getController().updateTaskStatus(options.id, options.status);
       console.log(result.message);
     } catch (error: any) {
       console.error('Update failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -212,7 +221,7 @@ program
   .action(async (options) => {
     try {
       if (options.list) {
-          const stats = await controller.getVerificationStats();
+          const stats = await getController().getVerificationStats();
           console.log(`\n>>> VERIFICATION SCENARIOS (${stats.total}) <<<`);
           console.log('ID'.padEnd(10) + ' | ' + 'Status'.padEnd(10) + ' | ' + 'Title');
           console.log('-'.repeat(80));
@@ -248,7 +257,7 @@ program
         success: (msg: string) => console.log(`\x1b[32m${msg}\x1b[0m`) // Green
       };
 
-      const result = await controller.runScenario(options.id, ui);
+      const result = await getController().runScenario(options.id, ui);
       
       if (result.status === 'FAIL') {
           process.exit(1);
@@ -257,7 +266,7 @@ program
       console.error('Verification failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -267,8 +276,8 @@ program
   .option('--ci', 'Headless mode for CI pipelines')
   .action(async (options) => {
     try {
-      await controller.sync();
-      const report = await controller.validate();
+      await getController().sync();
+      const report = await getController().validate();
       
       if (options.ci) {
         if (report.status === 'FAIL') {
@@ -299,7 +308,7 @@ program
       console.error('Validation failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -311,17 +320,17 @@ program
   .action(async (id, options) => {
     try {
       if (id.startsWith('TASK-')) {
-          const result = await controller.getContextBundle(id);
+          const result = await getController().getContextBundle(id);
           console.log(JSON.stringify(result, null, 2));
       } else {
-          const result = await controller.getContext(id, parseInt(options.depth));
+          const result = await getController().getContext(id, parseInt(options.depth));
           console.log(JSON.stringify(result, null, 2));
       }
     } catch (error: any) {
       console.error('Context retrieval failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
@@ -332,13 +341,13 @@ program
   .option('--user <user>', 'Implementer ID', process.env.USER || process.env.USERNAME || 'unknown-user')
   .action(async (id, options) => {
     try {
-        const result = await controller.startTask(id, options.user);
+        const result = await getController().startTask(id, options.user);
         console.log(result.message);
     } catch (error: any) {
         console.error('Start failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
@@ -350,13 +359,13 @@ program
   .action(async (id, options) => {
     try {
         const mode = options.summary ? 'summary' : 'full';
-        const diff = await controller.getTaskDiff(id, mode);
+        const diff = await getController().getTaskDiff(id, mode);
         console.log(diff);
     } catch (error: any) {
         console.error('Diff failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
@@ -366,13 +375,13 @@ program
   .argument('<id>', 'Task ID')
   .action(async (id) => {
     try {
-        const result = await controller.completeTask(id);
+        const result = await getController().completeTask(id);
         console.log(result.message);
     } catch (error: any) {
         console.error('Complete failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
@@ -383,13 +392,13 @@ program
   .option('--reviewer <user>', 'Reviewer ID', 'Current User')
   .action(async (id, options) => {
     try {
-        const result = await controller.approveTask(id, options.reviewer);
+        const result = await getController().approveTask(id, options.reviewer);
         console.log(result.message);
     } catch (error: any) {
         console.error('Approval failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
@@ -402,7 +411,7 @@ program
   .option('-i, --interactive', 'Interactive review mode')
   .action(async (options) => {
     try {
-        const tasks = await controller.getReviewTasks();
+        const tasks = await getController().getReviewTasks();
         
         if (tasks.length === 0) {
             console.log('No tasks in Review status.');
@@ -442,14 +451,14 @@ program
         console.error('Review failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
 async function runInteractiveReview(taskId: string) {
     try {
         console.log(`\nFetching diff for ${taskId}...`);
-        const diff = await controller.getTaskDiff(taskId);
+        const diff = await getController().getTaskDiff(taskId);
         console.log('\n' + diff);
         console.log('-'.repeat(80));
         
@@ -465,7 +474,7 @@ async function runInteractiveReview(taskId: string) {
 
         if (answer.toLowerCase() === 'y') {
             const reviewer = process.env.USER || process.env.USERNAME || 'reviewer';
-            const result = await controller.approveTask(taskId, reviewer);
+            const result = await getController().approveTask(taskId, reviewer);
             console.log(result.message);
         } else {
             console.log('Review cancelled.');
@@ -482,13 +491,13 @@ program
   .option('--out <dir>', 'Output directory', 'description')
   .action(async (options) => {
     try {
-        const result = await controller.generateDocs(options.out);
+        const result = await getController().generateDocs(options.out);
         console.log(result.message);
     } catch (error: any) {
         console.error('Generation failed:', error.message);
         process.exit(1);
     } finally {
-        controller.dispose();
+        getController().dispose();
     }
   });
 
@@ -498,13 +507,13 @@ program
   .argument('<id>', 'Artifact ID to analyze')
   .action(async (id) => {
     try {
-      await controller.sync();
-      const impact = controller.getImpact(id);
+      await getController().sync();
+      const impact = getController().getImpact(id);
       if (!impact) {
         console.error(`Artifact ${id} not found.`);
         process.exit(1);
       }
-      
+
       // Recursive print function for better readability?
       // For now, JSON is requested by specs ("Output format supports JSON").
       console.log(JSON.stringify(impact, null, 2));
@@ -512,8 +521,75 @@ program
       console.error('Impact analysis failed:', error.message);
       process.exit(1);
     } finally {
-      controller.dispose();
+      getController().dispose();
     }
   });
 
-program.parse();
+program
+  .command('summary')
+  .description('Generate visual summary of a specific artifact thread')
+  .argument('<id>', 'Task ID to summarize')
+  .action(async (id) => {
+    try {
+      await getController().sync();
+      const summary = getController().getThreadSummary(id);
+      if (!summary) {
+        console.error(`Task ${id} not found.`);
+        process.exit(1);
+      }
+
+      const { default: treeify } = await import('treeify');
+
+      const toTreeifyObj = (node: any): any => {
+          const result: any = {};
+          let i = 0;
+          for (const child of node.children) {
+              // Append status if it is present (e.g. [Already Shown])
+              const status = child.status ? ` ${child.status}` : '';
+              const label = `${child.nodeId} [${child.type}]${child.title ? ` - ${child.title}` : ''}${status}`;
+              
+              let uniqueLabel = label;
+              while (result[uniqueLabel] !== undefined) {
+                  uniqueLabel = `${label} (${++i})`;
+              }
+
+              result[uniqueLabel] = (child.children && child.children.length > 0) ? toTreeifyObj(child) : null;
+          }
+          return result;
+      };
+
+      const rootLabel = `${summary.nodeId} [${summary.type}]${summary.title ? ` - ${summary.title}` : ''}`;
+      const rootObj = toTreeifyObj(summary);
+
+      try {
+          const diff = await getController().getTaskDiff(id, 'full');
+          if (diff && diff.trim() !== '') {
+              const lines = diff.split('\n');
+              const maxLines = 15;
+              const diffNode: any = {};
+              lines.slice(0, maxLines).forEach((line, idx) => {
+                  diffNode[`${line}`] = null;
+              });
+              if (lines.length > maxLines) {
+                  diffNode[`... (${lines.length - maxLines} more lines)`] = null;
+              }
+              rootObj['Changes (Diff)'] = diffNode;
+          }
+      } catch (e) {
+          rootObj['Changes (Diff)'] = { '[Diff Error]': null };
+      }
+
+      const treeObj = { [rootLabel]: rootObj };
+
+      console.log(`\n--- Thread Summary for ${id} ---\n`);
+      console.log(treeify.asTree(treeObj, true, false));
+
+    } catch (error: any) {
+      console.error('Summary generation failed:', error.message);
+      process.exit(1);
+    } finally {
+      getController().dispose();
+    }
+  });
+
+program.parse(process.argv);

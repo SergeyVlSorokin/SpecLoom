@@ -36,8 +36,7 @@
              "description": "IDs of Test Scenarios (SCN-*) or Verification Tasks (TASK-*). MANDATORY for Verification phase."
         }
       },
-      "minProperties": 1,
-      "required": ["design_nodes", "verification_plans"]
+      "minProperties": 1
     },
     "acceptance_criteria": {
       "type": "array",
@@ -53,6 +52,10 @@
     "stability": { 
       "enum": ["Stable", "Draft", "TBD"],
       "description": "Used to signal to the agent if the requirement is ready for implementation."
+    },
+    "status": {
+      "enum": ["Proposed", "Active"],
+      "default": "Proposed"
     }
   },
   "required": ["id", "title", "description", "trace_to", "acceptance_criteria", "priority", "stability"]

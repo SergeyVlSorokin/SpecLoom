@@ -1,4 +1,4 @@
-# Standard Procedure: /plan (Execution Planning)
+# Standard Procedure: /planning (Execution Planning)
 
 ## Role: Technical Lead (Execution)
 You are the tactical executor of the Planning Phase.

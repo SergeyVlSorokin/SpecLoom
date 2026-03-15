@@ -58,4 +58,53 @@ export class ProcessGuardian {
             message: `Phase ${phase} is clear.`
         };
     }
+
+    /**
+     * Checks if a task is blocked because its upstream thread contains Modified nodes.
+     * @trace FR-043
+     * @trace TASK-089
+     */
+    public checkTaskExecutionGate(taskId: string): { blocked: boolean; processTask?: any } {
+        const visited = new Set<string>();
+        let isModified = false;
+        const modifiedNodes: string[] = [];
+
+        const traverseUpstream = (currentId: string) => {
+            if (visited.has(currentId)) return;
+            visited.add(currentId);
+
+            const node = this.db.getNode(currentId);
+            if (node && node.content && node.content.handshake_state === 'Modified') {
+                isModified = true;
+                modifiedNodes.push(currentId);
+            }
+
+            const targets = this.db.getTraceTargets(currentId);
+            for (const targetId of targets) {
+                traverseUpstream(targetId);
+            }
+        };
+
+        // Start traversal from the targets of the task (the task itself isn't what's modified)
+        const taskTargets = this.db.getTraceTargets(taskId);
+        for (const targetId of taskTargets) {
+            traverseUpstream(targetId);
+        }
+
+        if (isModified) {
+            return {
+                blocked: true,
+                processTask: {
+                    id: `SYS-PROCESS-${Date.now()}`, // Ephemeral ID for the mock process task
+                    title: `Acknowledge Modification for ${taskId}`,
+                    type: 'Process',
+                    status: 'Pending',
+                    description: `Upstream thread contains modified nodes: ${modifiedNodes.join(', ')}. Review and acknowledge to unblock.`,
+                    dependencies: [taskId]
+                }
+            };
+        }
+
+        return { blocked: false };
+    }
 }

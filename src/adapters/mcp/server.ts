@@ -10,13 +10,19 @@ import {
 import { SpecController } from '../../core/controllers/SpecController.js';
 import { PromptFactory } from '../../core/prompts/PromptFactory.js';
 import { readFileSync, existsSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const projectRoot = process.cwd();
+// Allow overriding project root via argument, fallback to cwd
+const args = process.argv.slice(2);
+const dirArgIndex = args.indexOf('--dir');
+const projectRoot = dirArgIndex !== -1 && args[dirArgIndex + 1] 
+    ? resolve(args[dirArgIndex + 1]!) 
+    : process.cwd();
+
 const controller = new SpecController(projectRoot);
 const promptFactory = new PromptFactory();
 
@@ -217,11 +223,11 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
   return {
     prompts: [
       { name: 'init', description: 'Initialize project context (Product Manager role)' },
-      { name: 'req', description: 'Define requirements (Business Analyst role)' },
-      { name: 'arch', description: 'Define architecture (System Architect role)' },
-      { name: 'plan', description: 'Create execution plan (Technical Lead role)' },
-      { name: 'impl', description: 'Implement tasks (Lead Developer role)' },
-      { name: 'verify', description: 'Verify implementation (QA Engineer role)' },
+      { name: 'req', description: 'Define requirements (Business Analyst role)', arguments: [{ name: 'input', description: 'Your request', required: true }] },
+      { name: 'arch', description: 'Define architecture (System Architect role)', arguments: [{ name: 'input', description: 'Your request', required: true }] },
+      { name: 'planning', description: 'Create execution plan (Technical Lead role)', arguments: [{ name: 'input', description: 'Your request', required: true }] },
+      { name: 'impl', description: 'Implement tasks (Lead Developer role)', arguments: [{ name: 'input', description: 'Your request', required: true }] },
+      { name: 'verify', description: 'Verify implementation (QA Engineer role)', arguments: [{ name: 'input', description: 'Your request', required: true }] },
       { name: 'info', description: 'Get SpecLoom manual and guide' },
       { name: 'project', description: 'Get project context summary' },
       { name: 'status', description: 'Get project health and status' },
@@ -229,6 +235,14 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
       { name: 'next', description: 'Get next actionable task', arguments: [{ name: 'list', description: 'If true, returns a list of all actionable tasks' }] },
       { name: 'review', description: 'Review completed tasks (Smart Mode)' },
       { name: 'load', description: 'Bootstrap SpecLoom session and get next step' },
+      { name: 'vision', description: 'Draft Product Context, Stakeholders, and Business Rules (Product Owner role)', arguments: [{ name: 'input', description: 'Your request', required: true }] },
+      /** @trace TASK-090 (MCP Chat Macros) */
+      { name: 'handshake', description: 'View pending handshakes or formally agree on modified artifacts. Run with no arguments to see what needs a handshake.', arguments: [
+        { name: 'id', description: 'Artifact ID to handshake (optional)', required: false },
+        { name: 'type', description: 'Artifact type to handshake (optional)', required: false },
+        { name: 'all', description: 'Set to "true" to handshake all modified artifacts (optional)', required: false }
+      ] },
+      { name: 'prioritize', description: 'Prioritize the task backlog' },
     ]
   };
 });
@@ -270,7 +284,35 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       } else if (name === 'project') {
           // Project prompt already instructs to read files, but we can pre-fetch if needed.
           // For now, let the static prompt guide the agent to read.
-      } else if (name === 'plan') {
+      } else if (name === 'vision') {
+          const pcPath = join(projectRoot, '.spec/data/01_context/product_context.json');
+          let pcData = {};
+          if (existsSync(pcPath)) {
+              try { pcData = JSON.parse(readFileSync(pcPath, 'utf8')); } catch (e) {}
+          }
+          
+          const stkPath = join(projectRoot, '.spec/data/01_context');
+          const stks: any[] = [];
+          if (existsSync(stkPath)) {
+              readdirSync(stkPath).filter(f => f.startsWith('stk_') && f.endsWith('.json')).forEach(f => {
+                  try { stks.push(JSON.parse(readFileSync(join(stkPath, f), 'utf8'))); } catch (e) {}
+              });
+          }
+          
+          const brPath = join(projectRoot, '.spec/data/01_context'); // Note: BRs are usually in 01_context or maybe 02, but typically 01. Let's check both if needed, but standard is 01_context
+          const brs: any[] = [];
+          if (existsSync(brPath)) {
+              readdirSync(brPath).filter(f => f.startsWith('br_') && f.endsWith('.json')).forEach(f => {
+                  try { brs.push(JSON.parse(readFileSync(join(brPath, f), 'utf8'))); } catch (e) {}
+              });
+          }
+
+          contextData = JSON.stringify({
+              product_context: pcData,
+              stakeholders: stks,
+              business_rules: brs
+          }, null, 2);
+      } else if (name === 'planning') {
           const templatePath = join(projectRoot, '.spec/core/templates/tasks/feature.json');
           if (existsSync(templatePath)) {
               const template = readFileSync(templatePath, 'utf8');
@@ -283,6 +325,25 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
           if (result.status === 'done') contextData = 'All tasks completed.';
           else if (result.status === 'blocked') contextData = `No actionable tasks. ${result.blockedCount} blocked.`;
           else contextData = JSON.stringify(result.tasks, null, 2);
+      } else if (name === 'prioritize') {
+          const result = await controller.getNextTask(true);
+          if (result.status === 'done') contextData = 'All tasks completed.';
+          else if (result.status === 'blocked') contextData = `No actionable tasks. ${result.blockedCount} blocked.`;
+          else contextData = JSON.stringify(result.tasks, null, 2);
+      } else if (name === 'handshake') {
+          let id = args?.id as string;
+          let type = args?.type as string;
+          let all = args?.all === 'true' || (args?.all as any) === true;
+
+          const result = await controller.handshake({ id, type, all });
+          contextData = JSON.stringify(result, null, 2);
+          
+          if (id && result.success && result.count > 0) {
+              const summary = controller.getThreadSummary(id);
+              if (summary) {
+                  contextData += '\n\n' + JSON.stringify({ thread_summary: summary }, null, 2);
+              }
+          }
       } else if (name === 'review') {
           const reviews = await controller.getReviewTasks();
           contextData = JSON.stringify({ pending_reviews: reviews }, null, 2);
@@ -331,12 +392,12 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
           contextData = JSON.stringify(stats, null, 2);
 
       // --- PHASE PROMPTS (Dual-Stack: Protocol + Procedure) ---
-      } else if (['req', 'arch', 'plan', 'impl', 'verify'].includes(name)) {
+      } else if (['req', 'arch', 'planning', 'impl', 'verify'].includes(name)) {
           // Map command to protocol filename
           const protocolMap: Record<string, string> = {
               'req': 'requirements_agent_prompt.md',
               'arch': 'architecture_agent_prompt.md',
-              'plan': 'planner_agent_prompt.md',
+              'planning': 'planner_agent_prompt.md',
               'impl': 'implementation_agent_prompt.md',
               'verify': 'verification_agent_prompt.md'
           };
@@ -370,13 +431,15 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
           contextData = `### ACTIVE PROTOCOL (The Rules)\n${protocolContent}`;
       }
 
+      const userInput = args?.input ? `\n\n### User Input / Request\n${args.input}` : "";
+
       return {
           messages: [
               {
                   role: 'user',
                   content: {
                       type: 'text',
-                      text: `[System State: ${state}]\n\n${basePrompt}\n\n${contextData ? "### Active Context Data\n" + contextData : ""}`
+                      text: `[System State: ${state}]\n\n${basePrompt}\n\n${contextData ? "### Active Context Data\n" + contextData : ""}${userInput}`
                   }
               }
           ]
@@ -467,8 +530,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === 'loom_init') {
-        const result = controller.init(args?.brownfield as string);
-        return { content: [{ type: 'text', text: result.message }] };
+      const initResult = await controller.init(args?.brownfield as string, args?.greenfield as boolean);
+      return { content: [{ type: 'text', text: initResult.message }] };
     }
 
     if (name === 'loom_import') {

@@ -31,7 +31,7 @@ export class PromptFactory {
       case 'init': return 'procedure_init.md';
       case 'req': return 'procedure_req.md';
       case 'arch': return 'procedure_arch.md';
-      case 'plan': return 'procedure_plan.md';
+      case 'planning': return 'procedure_planning.md';
       case 'impl': return 'procedure_impl.md';
       case 'verify': return 'procedure_verify.md';
       case 'info': return 'procedure_info.md';
@@ -41,6 +41,10 @@ export class PromptFactory {
       case 'next': return 'procedure_next.md';
       case 'review': return 'procedure_review.md';
       case 'load': return 'procedure_load.md';
+      // @trace TASK-090
+      case 'handshake': return 'procedure_handshake.md';
+      case 'prioritize': return 'procedure_prioritize.md';
+      case 'vision': return 'procedure_vision.md';
       default: return null;
     }
   }

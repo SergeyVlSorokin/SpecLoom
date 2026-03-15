@@ -1,14 +1,33 @@
 import { mkdirSync, writeFileSync, existsSync, cpSync, readdirSync, readFileSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createInterface } from 'readline';
 
 export class InitService {
     constructor(private projectRoot: string) {}
 
-    public init(brownfieldPath?: string) {
+    /**
+     * @trace TASK-068
+     */
+    public async init(brownfieldPath?: string, isSimpleMode?: boolean) {
         const specDir = join(this.projectRoot, '.spec');
         if (existsSync(specDir)) {
             return { message: 'SpecLoom is already initialized.' };
+        }
+
+        // Handle interactive prompt if not specified
+        let simple = isSimpleMode;
+        if (simple === undefined) {
+            const rl = createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            simple = await new Promise<boolean>(resolve => {
+                rl.question('Do you want to initialize in Simple (Greenfield) Mode? [Y/n] ', (answer) => {
+                    rl.close();
+                    resolve(answer.toLowerCase() !== 'n');
+                });
+            });
         }
 
         // Create Directory Structure
@@ -87,6 +106,33 @@ export class InitService {
                  scope: "Migration and Feature Addition"
              };
              writeFileSync(join(this.projectRoot, '.spec/data/01_context/product_context.json'), JSON.stringify(ctx, null, 2));
+        }
+
+        if (simple) {
+            const helloTask = {
+                id: "TASK-001",
+                title: "Hello World: Your First Feature",
+                type: "execution_task",
+                status: "Pending",
+                routine: "Feature",
+                "verification_regime": "Automated",
+                description: "Welcome to SpecLoom! This is your first task. To complete it, you just need to run 'loom start TASK-001' and then 'loom complete TASK-001'.",
+                "dependencies": [],
+                priority: 100,
+                context: {},
+                execution_steps: [
+                    "Run 'loom start TASK-001'",
+                    "Run 'loom complete TASK-001'"
+                ],
+                definition_of_done: [
+                    "Task is marked as completed."
+                ],
+                trace_to: {
+                    "system_requirements": ["SYS-DEFINE"]
+                }
+            };
+            writeFileSync(join(this.projectRoot, '.spec/data/06_execution/task_001_hello_world.json'), JSON.stringify(helloTask, null, 2));
+            return { message: 'SpecLoom initialized successfully in Simple Mode. Hello World task generated.' };
         }
 
         return { message: 'SpecLoom initialized successfully.' };

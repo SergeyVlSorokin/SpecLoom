@@ -18,6 +18,7 @@
     "Decompose FRs into Feature Tasks",
     "Sequence Dependencies",
     "Run 'loom next' to verify plan",
+    "Ask user for confirmation to complete task",
     "Run 'loom complete TASK-004'"
   ],
   "definition_of_done": [

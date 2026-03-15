@@ -8,6 +8,7 @@ import { WorkflowService } from '../use-cases/WorkflowService.js';
 import { InitService } from '../use-cases/InitService.js';
 import { DocGenerator } from '../use-cases/DocGenerator.js';
 import { StateAnalyzer } from '../engine/StateAnalyzer.js';
+import { SummaryGenerator } from '../use-cases/SummaryGenerator.js';
 import { existsSync, copyFileSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
 
@@ -21,6 +22,7 @@ export class SpecController {
   private initService: InitService;
   private docGenerator?: DocGenerator;
   private stateAnalyzer?: StateAnalyzer;
+  private summaryGenerator?: SummaryGenerator;
 
   constructor(private projectRoot: string) {
     this.initService = new InitService(projectRoot);
@@ -42,6 +44,7 @@ export class SpecController {
             this.workflowService = new WorkflowService(this.db, this.projectRoot);
             this.docGenerator = new DocGenerator(this.db, join(this.projectRoot, '.spec/core/templates'));
             this.stateAnalyzer = new StateAnalyzer(this.engine);
+            this.summaryGenerator = new SummaryGenerator(this.db);
         } catch (e) {
             console.warn("Failed to initialize GraphDatabase (Run 'loom init' first):", e);
         }
@@ -59,8 +62,11 @@ export class SpecController {
       }
   }
 
-  public init(brownfieldPath?: string) {
-      const result = this.initService.init(brownfieldPath);
+  /**
+   * @trace TASK-068
+   */
+  public async init(brownfieldPath?: string, isSimpleMode?: boolean) {
+      const result = await this.initService.init(brownfieldPath, isSimpleMode);
       this._initializeServices(); // Wake up services immediately
       return result;
   }
@@ -271,6 +277,83 @@ export class SpecController {
   public getImpact(id: string) {
     this.ensureInitialized();
     return this.engine!.getImpact(id);
+  }
+
+  public async handshake(options: { id?: string, type?: string, all?: boolean }) {
+    this.ensureInitialized();
+    await this.engine!.sync();
+
+    const nodes = this.db!.getAllNodes();
+    const toHandshake = nodes.filter(n => {
+        if (n.content.handshake_state !== 'Modified') return false;
+        if (options.id && n.id !== options.id) return false;
+        if (options.type && n.type !== options.type) return false;
+        return true;
+    });
+
+    if (toHandshake.length === 0) {
+        return { success: true, message: 'No artifacts found requiring handshake matching the criteria.', count: 0 };
+    }
+
+    // If the user didn't explicitly specify an ID, a Type, or say 'all: true', just list the pending items.
+    if (!options.id && !options.type && !options.all) {
+        return {
+            success: true,
+            status: 'pending_review',
+            message: `Found ${toHandshake.length} item(s) requiring a handshake. Provide 'id', 'type', or 'all=true' to confirm.`,
+            count: toHandshake.length,
+            pending_items: toHandshake.map(n => ({ id: n.id, type: n.type, title: n.content.title || n.content.name || n.content.story || '' }))
+        };
+    }
+
+    const { writeFileSync, readFileSync } = await import('fs');
+    const { join } = await import('path');
+
+    for (const node of toHandshake) {
+        // Need to update the JSON file in .spec/data/
+        const rootDir = process.cwd(); // Assume cwd is project root for simplicity or use a better way to find it
+        // A better way is to rely on the db, but we need the file path. The engine knows paths.
+        // Actually, we can use glob or find it.
+        // SpecEngine doesn't expose file paths. Let's just use the filesystem structure.
+        // Wait, I can search for it since the registry or FS is predictable, but to be robust, let's use the standard path:
+        // Actually, SpecEngine has `projectRoot`. Let's just use `this.engine!['projectRoot']`.
+        const projectRoot = (this.engine as any).projectRoot;
+        
+        // Find file
+        const { globSync } = await import('glob');
+        const files = globSync(`.spec/data/**/*.json`, { cwd: projectRoot });
+        
+        let fileUpdated = false;
+        for (const file of files) {
+            const fullPath = join(projectRoot, file);
+            let content;
+            try {
+                content = JSON.parse(readFileSync(fullPath, 'utf8'));
+            } catch (e) { continue; }
+            
+            if (content.id === node.id) {
+                delete content.handshake_state;
+                // calculate new hash
+                const { createHash } = await import('crypto');
+                const clone = { ...content };
+                delete clone.last_agreed_hash;
+                const str = JSON.stringify(clone);
+                content.last_agreed_hash = createHash('sha256').update(str).digest('hex');
+                
+                writeFileSync(fullPath, JSON.stringify(content, null, 2));
+                fileUpdated = true;
+                break;
+            }
+        }
+    }
+
+    await this.engine!.sync();
+    return { success: true, message: `Successfully handshaked ${toHandshake.length} artifact(s).`, count: toHandshake.length, artifacts: toHandshake.map(n => n.id) };
+  }
+
+  public getThreadSummary(taskId: string) {
+    this.ensureInitialized();
+    return this.summaryGenerator!.getThreadSummary(taskId);
   }
 
   public getStateAnalyzer() {
