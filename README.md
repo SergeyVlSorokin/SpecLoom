@@ -46,7 +46,8 @@ Add SpecLoom to your agent's settings:
   "mcpServers": {
     "specloom": {
       "command": "npx",
-      "args": ["-y", "specloom", "serve"]
+      "args": ["-y", "specloom", "loom-server", "--dir", "."],
+      "env": {}
     }
   }
 }
