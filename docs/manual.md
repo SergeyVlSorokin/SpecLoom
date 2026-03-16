@@ -5,14 +5,18 @@
 To use SpecLoom as a CLI tool without cluttering your project folder with `node_modules`, you have two options:
 
 ### Option A: Global Install (Recommended)
+
 Install it once on your system to use the `loom` command anywhere.
+
 ```bash
 npm install -g specloom
 loom init
 ```
 
 ### Option B: Run via NPX (Zero Install)
+
 Run the latest version directly without installing anything.
+
 ```bash
 npx specloom init
 ```
@@ -52,28 +56,31 @@ SpecLoom is a "Guardian" for your codebase. It enforces a strict V-Model (Requir
 
 To see what to do next:
 
-*   **Recommendation:** `loom next` (Shows the single highest priority task)
-*   **List Options:** `loom next --list` (Shows all actionable pending tasks)
+* **Recommendation:** `loom next` (Shows the single highest priority task)
+* **List Options:** `loom next --list` (Shows all actionable pending tasks)
 
 ## Reviewing Code
 
 Tasks with `verification_regime: Light` or `Strict` go to `Review` status upon completion.
 
-1.  **List Reviews:**
+1. **List Reviews:**
+
     ```bash
     loom review
     ```
 
-2.  **Interactive Review:**
+2. **Interactive Review:**
+
     ```bash
     loom review --interactive
     # or
     loom review --interactive -i
     ```
+
     This guides you through:
-    *   Selecting a task
-    *   Viewing the Diff
-    *   Approving (updates status to Done) or Rejecting
+    * Selecting a task
+    * Viewing the Diff
+    * Approving (updates status to Done) or Rejecting
 
 ## CI/CD Integration
 <!-- @trace TASK-069 -->
@@ -142,17 +149,25 @@ npx specloom validate --ci
 ## Troubleshooting
 
 ### Permission Errors (`EACCES` or `EPERM`)
+
 If `loom init` fails with permission errors:
-1.  **Check Ownership:** Ensure you own the current directory.
+
+1. **Check Ownership:** Ensure you own the current directory.
+
     ```bash
     ls -ld .
     ```
-2.  **Fix Ownership:** If the directory is owned by `root` (often caused by running with `sudo` previously), reclaim it:
+
+2. **Fix Ownership:** If the directory is owned by `root` (often caused by running with `sudo` previously), reclaim it:
+
     ```bash
     sudo chown -R $USER:$USER .
     ```
-3.  **Retry:** Run `loom init` again without `sudo`.
+
+3. **Retry:** Run `loom init` again without `sudo`.
 
 ### Validation Issues
+
 Run `loom validate` to find Orphans (Requirements without Parents) or Broken Links.
+
 Use `loom status` to see the overall health of the project.

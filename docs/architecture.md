@@ -122,7 +122,7 @@ graph TD
 | **User Req (`UR`)** | User Char | Functional Reqs |
 | **Business Rule (`BR`)** | Stakeholder | Functional Reqs |
 | **Constraint (`CON`)** | Stakeholder | Functional Reqs, ADRs |
-| **Non-Functional (`NFR`)**| Stakeholder | Functional Reqs, ADRs |
+| **Non-Functional (`NFR`)** | Stakeholder | Functional Reqs, ADRs |
 | **Assumption (`ASM`)** | *None (Root)* | FRs, ADRs |
 | **Functional Req (`FR`)** | UR, BR, NFR, CON, ASM | Architecture, Tasks, Code, Tests |
 | **ADR** | FR, NFR, CON, ASM | Tasks, Architecture Views |
