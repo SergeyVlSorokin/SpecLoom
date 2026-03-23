@@ -19,9 +19,7 @@ export enum NodeType {
   IMPLEMENTATION = 'implementation',
   VERIFICATION = 'verification',
   TEST_SCENARIO = 'test_scenario',
-  REFERENCE_SOURCE = 'reference_source',
-  FAULT_REPORT = 'fault_report',
-  ROOT_CAUSE_ANALYSIS = 'root_cause_analysis'
+  REFERENCE_SOURCE = 'reference_source'
 }
 
 export class SpecNode {

@@ -387,10 +387,6 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
               }
           }
       /** @trace TASK-079 (Verify Prompt) */
-      } else if (name === 'verify') {
-          const stats = await controller.getVerificationStats();
-          contextData = JSON.stringify(stats, null, 2);
-
       // --- PHASE PROMPTS (Dual-Stack: Protocol + Procedure) ---
       } else if (['req', 'arch', 'planning', 'impl', 'verify'].includes(name)) {
           // Map command to protocol filename
@@ -404,8 +400,6 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
           
           const protocolFile = protocolMap[name]!;
           let protocolContent = "Protocol not found. Please ensure .spec/core/protocol or src/assets/protocol exists.";
-
-          // Priority 1: Project-specific protocol
 
           // Priority 1: Project-specific protocol
           const projectProtocolPath = join(projectRoot, '.spec/core/protocol', protocolFile);
@@ -429,6 +423,11 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
           }
 
           contextData = `### ACTIVE PROTOCOL (The Rules)\n${protocolContent}`;
+
+          if (name === 'verify') {
+              const stats = await controller.getVerificationStats();
+              contextData += `\n\n### Verification Stats & Pending Scenarios\n${JSON.stringify(stats, null, 2)}`;
+          }
       }
 
       const userInput = args?.input ? `\n\n### User Input / Request\n${args.input}` : "";

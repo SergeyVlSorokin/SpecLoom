@@ -36,7 +36,7 @@ We define **10 Standard Prompts** that cover the entire V-Model lifecycle.
 | **`/arch`** | 5 (Design) | System Architect | Checks `FR` coverage. Enforces "Views First" rule. Mandates `ADR` for decision points. |
 | **`/plan`** | 6a (Planning) | Technical Lead | Breaks `FR`/`ADR` into `TASK`s. Checks dependencies. Enforces `Definition of Done` and `Traceability`. |
 | **`/impl`** | 6b (Execution)| Lead Developer | Reads `loom next` (Active/Next Task). Ingests the **Context Bundle** for that task. Returns "Coding Agent" instructions. |
-| **`/verify`**| 6c (Quality) | QA Engineer | Reviews implementation against `FR`/`ADR`. Generates `SCN` (Scenarios). Handles **Fault Reports (`FRT`)** and **RCA**. |
+| **`/verify`**| 6c (Quality) | QA Engineer | Reviews implementation against `FR`/`ADR`. Generates `SCN` (Scenarios). Handles **Defect Tasks**. |
 
 ### B. Utility Accessors (Direct Retrieval)
 

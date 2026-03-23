@@ -261,7 +261,7 @@ export class SpecEngine {
             // TODO: In verbose mode, log this.
             // Also need to be careful about nodes that are NOT file-based but persistent?
             // Currently, all non-impl/verif nodes should be file-based.
-            // Exception: Fault Reports if created via API and not saved to file yet? 
+            // Exception: Some nodes if created via API and not saved to file yet? 
             // But system design says everything is file-based.
             this.db.deleteNode(node.id);
         }
@@ -299,8 +299,6 @@ export class SpecEngine {
       if (id.startsWith('SYS-')) return NodeType.SYSTEM_REQUIREMENT;
       if (id.startsWith('SCN-')) return NodeType.TEST_SCENARIO;
       if (id.startsWith('REF-')) return NodeType.REFERENCE_SOURCE;
-      if (id.startsWith('FRT-')) return NodeType.FAULT_REPORT;
-      if (id.startsWith('RCA-')) return NodeType.ROOT_CAUSE_ANALYSIS;
       return null;
   }
 
@@ -477,13 +475,16 @@ export class SpecEngine {
       const passed = scenarios.filter(s => s.last_run_status === 'Pass').length;
       const failed = scenarios.filter(s => s.last_run_status === 'Fail').length;
       const untested = scenarios.length - passed - failed;
-      
       return {
           total: scenarios.length,
           passed,
           failed,
           untested,
-          scenarios
+          pending_scenarios: scenarios.filter(s => s.last_run_status !== 'Pass').map(s => ({
+              id: s.id,
+              title: s.title,
+              status: s.last_run_status || 'Untested'
+          }))
       };
   }
 

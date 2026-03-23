@@ -83,11 +83,9 @@ You must adhere to the following strict operational routines to prevent "vibe-co
     *   **Validate:** Run `loom validate` and fix orphans.
     *   **Release:** `loom complete <task_id>`
 3.  **Routine: Defect Resolution (Fix)**
-    *   **Report:** Create `FRT-XXX` (Fault Report).
-    *   **Analyze:** Create `RCA-XXX` (Root Cause) linked to `FRT`.
-    *   **Plan:** Create `TASK-XXX` (Type: `Defect_Resolution`) linked to `RCA`.
+    *   **Plan:** Create or update `TASK-XXX` (Type: `Defect`) linked directly to the failed `SCN` or `FR`.
     *   **Lock:** `loom start <task_id>`
-    *   **Verify:** MUST add a Regression Test case (`SCN`).
+    *   **Verify:** MUST add or update a Regression Test case (`SCN`) to prevent recurrence.
     *   **Release:** `loom complete <task_id>`
 
 ## Interaction Style

@@ -240,25 +240,13 @@ In scenarios where a Task needs to be reset, paused, or manually adjusted outsid
 
 ## 17. Defect Resolution Protocol
 
-Defects are handled through a strict **Fault Report -> Root Cause -> Task** cycle to ensure that failures are not just patched, but understood and eliminated at the source.
+Defects in code or verification failures remain in the Execution loop to prevent bureaucratic friction.
 
-### A. Criteria for Fault Reporting
-Create a **Fault Report (FRT)** ONLY when:
-1.  **Verification Failure:** A Test Scenario (`SCN`) fails during the `Verify` phase.
-2.  **Requirement Violation:** The system behavior contradicts a `FR`, `NFR`, or `BR`.
-3.  **Critical Incident:** A production outage or severe bug.
+### A. Execution Defects
+*   **Trigger:** A test fails during verification, or a bug is found in implementation.
+*   **Action:** The Developer creates or updates an Execution Task (`TASK-XXX` with Type: `Defect`) linked to the failed `SCN` or `FR`.
+*   **Resolution:** The developer fixes the code, ensures the test passes, and completes the task. No formal Fault Report or Root Cause Analysis is required.
 
-### B. The RCA Mandate
-**Rule:** You CANNOT start a Task to fix a Fault Report without a linked **Root Cause Analysis (RCA)**.
-*   **Why?** "Quick fixes" often mask deeper architectural flaws.
-*   **Procedure:**
-    1.  Create `FRT-XXX` describing the failure.
-    2.  Perform the "Five Whys" analysis.
-    3.  Create `RCA-XXX` documenting the root cause and linking to `FRT-XXX`.
-    4.  Create `TASK-XXX` (Type: `Defect_Resolution`) linked to `RCA-XXX`.
-
-### C. The Closed Loop
-The defect is considered "Resolved" ONLY when:
-1.  The `Corrective Action Plan` (Task) is Complete.
-2.  The original `Fault Report` is verified as Fixed.
-3.  A **Regression Test** is added to the suite.
+### B. Alignment Defects
+*   **Trigger:** The code passes tests, but the Product Owner realizes the feature doesn't solve the Business Need.
+*   **Action:** The PO must edit the upstream User Story (`UR`) or `FR`. This invalidates the downstream anchors, triggering a Delta Handshake to realign the vision before new execution tasks are created.
