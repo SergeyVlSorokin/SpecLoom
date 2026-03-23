@@ -16,20 +16,28 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## Procedure
 1.  **Analyze Context (MANDATORY)**
     *   You MUST review `product_context.json` and existing `STK` artifacts.
-    *   You MUST identify any missing `UCH` (User Characteristics) or `UR` (User Requirements).
+    *   You MUST identify any missing `UCH` (User Characteristics) or `UR` (Use Cases).
     *   If returning to this phase (adding new requirements), you MUST check for conflicts with existing Design/Implementation.
 
-2.  **Elicitation Loop (RECOMMENDED)**
-    *   **Ask:** "What user needs or business goals are we addressing?"
-    *   **Capture:** Create draft artifacts (Mental Model).
+2.  **Elicitation Loop & UX Checklist (RECOMMENDED)**
+    *   Before drafting a Use Case (`UR`), you MUST systematically interrogate the user using the **7-Point UX Journey Checklist**:
+        1.  **Entry Point:** What triggers this action? How does the user find it?
+        2.  **Identity & Access:** Do they need to be logged in? Is there a guest checkout?
+        3.  **State, Feedback & Continuity:** What does the user see before data exists? How do they know the action succeeded? Can they cancel it?
+        4.  **Unhappy Path & Resilience:** What happens if resources are unavailable? How does the system gracefully recover? (These become Exceptions).
+        5.  **Downstream Actors:** Does this action create work for someone else (e.g., an Admin)?
+        6.  **Retention & Progression:** Do we need to remember preferences for next time?
+        7.  **Environmental Context:** Is this mobile-first? Time-sensitive?
+    *   **Design System Elicitation:** You MUST ask the user about global UI/UX aesthetics (e.g., Colors, Typography, UI Framework like Tailwind/React). These MUST be captured as `NFR`s or `Constraints`, NOT as Use Cases.
+    *   **Capture:** Create draft Use Case Tables based on the checklist answers.
     *   **Verify:** Check alignment with `requirements_agent_prompt.md` (Atomic, Traceable).
 
 3.  **Execution (File Creation)**
-    *   **Create Files:** You MUST generate JSON files for new requirements (`UR-XXX.json`, `FR-XXX.json`).
+    *   **Create Files:** You MUST generate JSON files for new requirements (`UR-XXX.json`, `FR-XXX.json`, `NFR-XXX.json`, `CON-XXX.json`).
     *   **Create Tests:** You MUST create `test_scenario` (`SCN-XXX.json`) artifacts:
         *   For `UR`s: Create **User Acceptance Scenarios** (Focus on "What").
         *   For `FR`s: Create **Functional Scenarios** (Focus on "How").
-    *   **Link Traces:** You MUST populate `trace_to` fields to connect artifacts upstream (e.g., `FR -> UR`, `SCN -> UR/FR`).
+    *   **Link Traces:** You MUST populate `trace_to` fields to connect artifacts upstream (e.g., `FR -> UR` steps/exceptions, `SCN -> UR/FR`).
     *   **Sync:** You SHOULD run `loom sync` to register changes immediately.
 
 4.  **Validation & Handover**

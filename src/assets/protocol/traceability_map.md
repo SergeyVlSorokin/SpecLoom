@@ -4,8 +4,7 @@ This document defines the strict dependency graph for SpecLoom artifacts. It enf
 
 ## 1. The Dependency Graph
 
-The arrows ($
-ightarrow$) represent "Traces To" (Depends On). If a parent node changes, all children are impacted.
+The arrows ($\rightarrow$) represent "Traces To" (Depends On). If a parent node changes, all children are impacted.
 
 ### 3. The Artifact Traceability Map
 
@@ -29,7 +28,7 @@ graph TD
     end
 
     subgraph Layer_2_Specification ["2. Specification (The What)"]
-        UR[User Requirement] --> UCH
+        UR[Use Case / UR] --> UCH
         FR[Functional Requirement] --> UR
         FR --> BR
         FR --> CON
@@ -61,13 +60,6 @@ graph TD
         TEST["Verification (tests)"] -.->|"@trace"| FR
         SCN[Test Scenario] -.->|"@trace"| FR
     end
-
-    subgraph Layer_6_Defects ["6. Defects & RCA"]
-        FRT[Fault Report] -.-> SCN
-        FRT -.-> FR
-        RCA[Root Cause] --> FRT
-        TASK_DEFECT[Defect Task] --> RCA
-    end
 ```
 
 ### Traceability Matrix
@@ -76,17 +68,15 @@ graph TD
 | :--- | :--- | :--- |
 | **System Req (`SYS`)** | *None (Root)* | Process Tasks |
 | **Stakeholder (`STK`)** | Product Context | BR, NFR, CON, UCH |
-| **User Char (`UCH`)** | Stakeholder | User Requirements |
-| **User Req (`UR`)** | User Char | Functional Reqs |
+| **User Char (`UCH`)** | Stakeholder | Use Cases (`UR`) |
+| **Use Case (`UR`)** | User Char | Functional Reqs |
 | **Business Rule (`BR`)** | Stakeholder | Functional Reqs |
 | **Constraint (`CON`)** | Stakeholder | Functional Reqs, ADRs |
 | **Non-Functional (`NFR`)**| Stakeholder | Functional Reqs, ADRs |
 | **Assumption (`ASM`)** | *None (Root)* | FRs, ADRs |
-| **Functional Req (`FR`)** | UR, BR, NFR, CON, ASM | Architecture, Tasks, Code, Tests |
+| **Functional Req (`FR`)** | UR (steps/exceptions), BR, NFR, CON, ASM | Architecture, Tasks, Code, Tests |
 | **ADR** | FR, NFR, CON, ASM | Tasks, Architecture Views |
 | **Execution Task** | FR, ADR, SYS | Sessions, Code Changes |
-| **Fault Report (`FRT`)** | SCN, FR | Root Cause (`RCA`) |
-| **Root Cause (`RCA`)** | FRT | Defect Resolution Tasks |
 
 
 ## 2. Definitions & Rules
@@ -95,17 +85,17 @@ graph TD
 *   **Stakeholder (`STK`)**: An entity that has an interest in the project but does not necessarily *use* the system (e.g., CTO, Regulator, Buyer).
     *   *Primary Output:* `Business Rules`, `NFRs`, `Constraints`.
 *   **User Characteristic (`UCH`)**: A distinct persona or actor that interacts with the system (e.g., "Junior Developer", "Admin").
-    *   *Primary Output:* `User Requirements` (User Stories).
+    *   *Primary Output:* `Use Cases` (`UR`).
 
 ### B. The Two Paths to a Feature (`FR`)
 A Functional Requirement (`FR`) can exist for two reasons:
-1.  **The Usage Path:** A User (`UCH`) has a specific Need (`UR`).
-    *   *Example:* "As a Dev (`UCH`), I want to see a graph (`UR`), so the system must render nodes (`FR`)."
+1.  **The Usage Path:** A User (`UCH`) has a specific Interaction Flow (`UR`).
+    *   *Example:* "As a Dev (`UCH`), I trigger the view graph command (`UR`), so the system must render nodes (`FR` linked to step 2)."
 2.  **The Governance Path:** A Stakeholder (`STK`) enforces a Rule (`BR`).
     *   *Example:* "The CTO (`STK`) mandates GDPR (`BR`), so the system must encrypt logs (`FR`)."
 
 ### C. Validation Triangle
 A Feature is **Complete** only when:
-1.  **Definition:** The `FR` exists and traces to a `UR` or `BR`.
+1.  **Definition:** The `FR` exists and traces to a `UR` (specific step/exception) or `BR`.
 2.  **Implementation:** Code exists with `@trace FR-XXX`.
 3.  **Verification:** A Test/Scenario exists with `@trace FR-XXX` and `@trace UR-XXX`

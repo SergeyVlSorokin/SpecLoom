@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UI Component Specification",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^UIC-[0-9]{3}$" },
+    "name": { "type": "string" },
+    "layout_structure": { "type": "string", "description": "High-level description of layout (e.g., Header, Sidebar, Grid)." },
+    "child_components": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Nested components within this spec."
+    },
+    "state_and_props": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Local/Global state or properties required."
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "api_contracts": { "type": "array", "items": { "type": "string" }, "description": "APIs this component binds to." },
+        "user_requirements": { "type": "array", "items": { "type": "string" }, "description": "Specific Use Case steps this UI implements." }
+      },
+      "minProperties": 1
+    },
+    "handshake_state": {"enum": ["Draft", "Agreed", "Modified"], "default": "Draft"},
+    "last_agreed_hash": {"type": "string"}
+  },
+  "required": ["id", "name", "layout_structure", "trace_to"]
+}

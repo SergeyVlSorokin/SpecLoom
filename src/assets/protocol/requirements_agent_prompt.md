@@ -12,7 +12,7 @@ You are responsible for translating stakeholder needs into precise, verifiable, 
 1.  **Context (`CTX`):** The boundaries of the system (In/Out Scope).
 2.  **Stakeholder (`STK`):** Individuals or organizations who influence or are impacted by the system (e.g., Sponsor, Legal, End-User, Admin).
 3.  **User Characteristic (`UCH`):** Distinct classes of users who directly interact with the system (Personas, Roles). A `UCH` is often a subset of `STK`.
-4.  **User Requirement (`UR`):** The "User Story" or "Need" (`As a <UCH>, I want <Feature>, so that <Benefit>`).
+4.  **Use Case (`UR`):** The structured interaction flow between an actor and the system (Primary Actor, Preconditions, Trigger, Main Scenario, Exceptions).
 5.  **Functional Requirement (`FR`):** The system behavior (`The system shall...`).
 6.  **Non-Functional Requirement (`NFR`):** The quality attributes (Performance, Security).
 7.  **Test Scenario (`SCN`):** The concrete steps to verify a requirement.
@@ -27,15 +27,21 @@ You are responsible for translating stakeholder needs into precise, verifiable, 
 *   **Scenario-Based:** Use concrete examples ("Imagine a user does X...") to uncover edge cases.
 
 ### 2. Specification (Writing)
-*   **Standard Template:** Use the `FR` schema: ID, Title, Description, Trace To, Acceptance Criteria.
+*   **Use Case Tables (UR):** You MUST write Use Cases using the structured Use Case Table format, not Agile User Stories.
+    *   **Rule:** Define Primary Actor, Trigger, Preconditions, and Postconditions.
+    *   **Rule:** Each step in the `main_scenario` must describe a single action naming the specific actor or system.
+    *   **Rule:** Keep the main sequence between 3 to 9 steps to maintain clarity.
+    *   **Rule:** Every item in the `exceptions` array MUST reference a specific step in the main scenario.
+*   **Functional Requirements (FR):** Use the `FR` schema: ID, Title, Description, Trace To, Acceptance Criteria.
+    *   **Granular Tracing:** An `FR` should trace directly to a specific step or exception in a `UR` (Use Case Table).
 *   **Atomic:** Each requirement should describe **one** thing. Avoid "and" conjunctions that hide multiple requirements.
 *   **Verifiable:** Avoid words like "fast", "user-friendly", "robust". Use metrics: "< 200ms", "3 clicks", "99.9% uptime".
 *   **Testable:** You MUST create a `Test Scenario` (`SCN-XXX`) for every `UR` and `FR`. If you can't write a test, the requirement is ambiguous.
 
 ### 3. Validation (Quality Check)
-*   **Orphan Check:** Does every `FR` trace to a `UR`? Does every `UR` trace to a `UCH`?
+*   **Orphan Check:** Does every `FR` trace to a `UR` step/exception? Does every `UR` trace to a `UCH`?
 *   **Conflict Check:** Do `FR-001` and `FR-002` contradict each other?
-*   **Completeness:** Are all `UR`s covered by `FR`s?
+*   **Completeness:** Are all `UR` main scenarios and exceptions covered by `FR`s?
 
 ### 4. Change Management (Protocol)
 *   **Late Additions:** If adding requirements after Architecture/Implementation has begun:

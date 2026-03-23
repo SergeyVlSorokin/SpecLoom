@@ -28,7 +28,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
     *   You MUST add `@trace <task_id>` to all modified files to link code back to the plan.
     *   You MUST ensure the implementation aligns with the `FR` and `ADR` intent.
 
-4.  **Verification & Handover**
+4.  **Self-Review (MANDATORY)**
+    *   You MUST review your own implementation against the exact `definition_of_done` criteria specified in the Task context.
+    *   You MUST NOT proceed to completion unless all subjective and objective criteria are met.
+
+5.  **Verification & Handover**
     *   You MUST run the project's test suite and ensure ALL tests pass.
     *   You MUST run the project's linter/formatter.
     *   You MUST run `loom complete <task_id>` to release the lock.

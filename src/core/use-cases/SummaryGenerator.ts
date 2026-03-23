@@ -5,6 +5,7 @@ export interface ThreadSummary {
   type: string;
   status?: string;
   title?: string;
+  details?: any;
   children: ThreadSummary[];
 }
 
@@ -46,11 +47,24 @@ export class SummaryGenerator {
         children = parentIds.map(pid => buildUpstreamTree(pid, visited));
       }
 
+      let details: any = undefined;
+      if (node.type === 'user_requirement') {
+        details = {
+          primary_actor: node.content?.primary_actor,
+          trigger: node.content?.trigger,
+          preconditions: node.content?.preconditions,
+          postconditions: node.content?.postconditions,
+          main_scenario: node.content?.main_scenario,
+          exceptions: node.content?.exceptions
+        };
+      }
+
       return {
         nodeId: node.id,
         type: node.type,
         title: nodeTitle,
         status: node.content?.status,
+        details,
         children
       };
     };

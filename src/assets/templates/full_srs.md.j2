@@ -21,10 +21,32 @@
 
 ## 3. Requirements
 
-### 3.1 User Requirements
+### 3.1 Use Cases (User Requirements)
 {% for ur in user_requirements %}
-*   **{{ ur.id }}:** As a **{{ ur.user_role }}**, I want **{{ ur.story }}**
-    *   *Trace:* {{ ur.trace_to | tojson }}
+#### {{ ur.id }}: {{ ur.title }}
+*   **Primary Actor:** {{ ur.primary_actor }}
+*   **Trigger:** {{ ur.trigger }}
+*   **Preconditions:**
+    {% for p in ur.preconditions %}
+    - {{ p }}
+    {% endfor %}
+*   **Postconditions:**
+    {% for p in ur.postconditions %}
+    - {{ p }}
+    {% endfor %}
+*   **Main Scenario:**
+    {% for step in ur.main_scenario %}
+    {{ step.step }}. {{ step.action }}
+    {% endfor %}
+*   **Exceptions:**
+    {% for exc in ur.exceptions %}
+    - **{{ exc.step_ref }}a ({{ exc.condition }}):** {{ exc.action }}
+    {% endfor %}
+*   **Acceptance Criteria:**
+    {% for ac in ur.acceptance_criteria %}
+    - {{ ac }}
+    {% endfor %}
+*   **Trace:** {{ ur.trace_to | tojson }}
 {% endfor %}
 
 ### 3.2 Functional Requirements

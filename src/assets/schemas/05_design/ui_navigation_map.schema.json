@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UI Navigation Map",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^NAV-[0-9]{3}$" },
+    "name": { "type": "string" },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "layout_wrapper": { "type": "string", "description": "e.g., DashboardLayout, PublicLayout" },
+          "auth_gate": { "type": "string", "description": "e.g., AdminOnly, Authenticated, None" },
+          "components": { 
+             "type": "array", 
+             "items": { "type": "string" },
+             "description": "Primary UI Component Specs rendered at this route."
+          }
+        },
+        "required": ["path", "layout_wrapper"]
+      }
+    },
+    "trace_to": {
+      "type": "object",
+      "properties": {
+        "user_requirements": { "type": "array", "items": { "type": "string" }, "description": "Links to high-level URs this navigation supports." }
+      },
+      "minProperties": 1
+    },
+    "handshake_state": {"enum": ["Draft", "Agreed", "Modified"], "default": "Draft"},
+    "last_agreed_hash": {"type": "string"}
+  },
+  "required": ["id", "name", "routes", "trace_to"]
+}
