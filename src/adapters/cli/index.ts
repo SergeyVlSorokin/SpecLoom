@@ -225,8 +225,8 @@ program
           console.log(`\n>>> VERIFICATION SCENARIOS (${stats.total}) <<<`);
           console.log('ID'.padEnd(10) + ' | ' + 'Status'.padEnd(10) + ' | ' + 'Title');
           console.log('-'.repeat(80));
-          stats.scenarios.forEach((s: any) => {
-              const status = s.last_run_status || 'Untested';
+          stats.pending_scenarios.forEach((s: any) => {
+              const status = s.status || 'Untested';
               const title = s.title.length > 50 ? s.title.substring(0, 47) + '...' : s.title;
               console.log(`${s.id.padEnd(10)} | ${status.padEnd(10)} | ${title}`);
           });
