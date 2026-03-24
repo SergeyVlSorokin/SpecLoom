@@ -31,6 +31,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
     *   **Design System Elicitation:** You MUST ask the user about global UI/UX aesthetics (e.g., Colors, Typography, UI Framework like Tailwind/React). These MUST be captured as `NFR`s or `Constraints`, NOT as Use Cases.
     *   **Capture:** Create draft Use Case Tables based on the checklist answers.
     *   **Verify:** Check alignment with `requirements_agent_prompt.md` (Atomic, Traceable).
+    *   **Horizontal Expansion:** You MUST prioritize horizontal progression. Continue capturing and drafting overarching Use Cases (`UR`s) to map out the entire system surface area before diving deep into granular details.
+    *   **Handshake Gate:** You MUST NOT proceed to Step 3 (FR/SCN creation) until ALL overarching URs have been drafted and the user has explicitly agreed to the scope (e.g., via the `/handshake` command).
 
 3.  **Execution (File Creation)**
     *   **Create Files:** You MUST generate JSON files for new requirements (`UR-XXX.json`, `FR-XXX.json`, `NFR-XXX.json`, `CON-XXX.json`).
