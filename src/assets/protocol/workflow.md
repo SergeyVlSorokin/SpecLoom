@@ -39,7 +39,7 @@ The workflow strictly follows the schema-data directory structure.
 | **2. Strategy** | `02_pivots` | `assumption` | **Risk Ack:** User accepts "Bets". |
 | **3. Intent** | `03_users` | `user_char`, `user_requirement` | **Needs Validated:** Stories mapped to Stakeholders. |
 | **4. Specification** | `04_system` | `functional_requirement`, `non_functional`, `constraint` | **Contract Signed:** Clear Acceptance Criteria. |
-| **5. Architecture** | `05_design` | `api_contract`, `data_model`, `architecture_view` (4+1), `adr` | **Design Freeze:** Interface matches Specs & ADRs approved. |
+| **5. Architecture** | `05_design` | `api_contract`, `data_model`, `logical_component` (4+1), `adr` | **Design Freeze:** Interface matches Specs & ADRs approved. |
 | **6. Execution** | `06_execution` | `task`, `session` | **Implementation:** Code generation begins. |
 
 ---

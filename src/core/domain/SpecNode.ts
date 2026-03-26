@@ -12,7 +12,9 @@ export enum NodeType {
   API_CONTRACT = 'api_contract',
   DATA_MODEL = 'data_model',
   ADR = 'adr',
-  ARCHITECTURE_VIEW = 'architecture_view',
+  LOGICAL_COMPONENT = 'logical_component',
+  PHYSICAL_COMPONENT = 'physical_component',
+  FUNCTIONAL_CHAIN = 'functional_chain',
   EXECUTION_TASK = 'execution_task',
   BUSINESS_RULE = 'business_rule',
   SYSTEM_REQUIREMENT = 'system_requirement',
@@ -24,7 +26,7 @@ export enum NodeType {
 
 export class SpecNode {
   public readonly hash: string;
-  private static ID_REGEX = /^[A-Z]{2,4}-[0-9]{3}$/;
+  private static ID_REGEX = /^[A-Z]{2,6}-[0-9]{3}$/;
   private static SYS_ID_REGEX = /^SYS-[A-Z]+$/;
 
   constructor(

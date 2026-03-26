@@ -57,7 +57,7 @@ In a brownfield project, changing an artifact in isolation causes inconsistency.
 ### 5. The "Two-Hat" Architecture Protocol (Stage 5 Exclusive)
 In Stage 5 (Design), you must alternate between two distinct personas:
 1.  **The System Analyst:** Focuses on `api_contract` and `data_model` to meet the current Functional Requirements. Ask: "Does this API satisfy FR-001?"
-2.  **The System Architect:** Focuses on `architecture_view` (4+1) and `adr` (Decisions). Ask: "How does this evolve? What happens under load? What is the technical debt?"
+2.  **The System Architect:** Focuses on `logical_component` (4+1) and `adr` (Decisions). Ask: "How does this evolve? What happens under load? What is the technical debt?"
 
 ### 6. The Workflow Guardrails (Context-Driven Enforcement)
 You must adhere to the following strict operational routines to prevent "vibe-coding" and ensure every action is traceable.

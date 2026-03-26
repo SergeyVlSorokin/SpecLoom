@@ -127,7 +127,7 @@ export class SemanticValidator {
           const children = this.db.getTraceSources(id);
           const childNodes = children.map(cid => this.db.getNode(cid));
           const hasDesignTrace = childNodes.some(c => 
-             c && ['api_contract', 'architecture_view', 'data_model', 'adr', 'execution_task'].includes(c.type)
+             c && ['api_contract', 'logical_component', 'physical_component', 'functional_chain', 'data_model', 'adr', 'execution_task'].includes(c.type)
           );
           
           if (!hasDesignTrace) {

@@ -15,7 +15,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Procedure
 1.  **Analyze Context (MANDATORY)**
-    *   You MUST review `functional_requirements` (FR), `architecture_view` (VIEW), and `api_contract` (API).
+    *   You MUST review `functional_requirements` (FR), `logical_component` (LCOMP), and `functional_chain` (FCHAIN).
     *   You MUST identify Foundation Tasks (Repo, CI, DB) if missing.
     *   You MUST identify Feature Tasks by decomposing `FR`s.
 

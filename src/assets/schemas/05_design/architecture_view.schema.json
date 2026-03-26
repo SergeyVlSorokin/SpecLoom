@@ -3,7 +3,7 @@
   "title": "Architecture View (4+1)",
   "type": "object",
   "properties": {
-    "id": { "type": "string", "pattern": "^VIEW-[0-9]{3}$" },
+    "id": { "type": "string", "pattern": "^LCOMP-[0-9]{3}$" },
     "name": { "type": "string" },
     "viewpoint": {
       "enum": ["Logical", "Process", "Physical", "Development", "Scenarios"],

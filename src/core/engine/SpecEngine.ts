@@ -294,7 +294,9 @@ export class SpecEngine {
       if (id.startsWith('API-')) return NodeType.API_CONTRACT;
       if (id.startsWith('DATA-')) return NodeType.DATA_MODEL;
       if (id.startsWith('ADR-')) return NodeType.ADR;
-      if (id.startsWith('VIEW-')) return NodeType.ARCHITECTURE_VIEW;
+      if (id.startsWith('LCOMP-')) return NodeType.LOGICAL_COMPONENT;
+      if (id.startsWith('PCOMP-')) return NodeType.PHYSICAL_COMPONENT;
+      if (id.startsWith('FCHAIN-')) return NodeType.FUNCTIONAL_CHAIN;
       if (id.startsWith('TASK-')) return NodeType.EXECUTION_TASK;
       if (id.startsWith('SYS-')) return NodeType.SYSTEM_REQUIREMENT;
       if (id.startsWith('SCN-')) return NodeType.TEST_SCENARIO;
@@ -330,7 +332,7 @@ export class SpecEngine {
       { id: 2, name: 'Strategy', types: [NodeType.ASSUMPTION] },
       { id: 3, name: 'Intent', types: [NodeType.USER_CHAR, NodeType.USER_REQUIREMENT] },
       { id: 4, name: 'Specification', types: [NodeType.FUNCTIONAL_REQUIREMENT, NodeType.NON_FUNCTIONAL_REQUIREMENT, NodeType.CONSTRAINT, NodeType.BUSINESS_RULE] },
-      { id: 5, name: 'Architecture', types: [NodeType.API_CONTRACT, NodeType.DATA_MODEL, NodeType.ADR, NodeType.ARCHITECTURE_VIEW] },
+      { id: 5, name: 'Architecture', types: [NodeType.API_CONTRACT, NodeType.DATA_MODEL, NodeType.ADR, NodeType.LOGICAL_COMPONENT, NodeType.PHYSICAL_COMPONENT, NodeType.FUNCTIONAL_CHAIN] },
       { id: 6, name: 'Execution', types: [NodeType.EXECUTION_TASK] },
       { id: 7, name: 'Implementation', types: [NodeType.IMPLEMENTATION] },
       { id: 8, name: 'Verification', types: [NodeType.VERIFICATION, NodeType.TEST_SCENARIO] }

@@ -23,7 +23,7 @@ export class SummaryGenerator {
     // First, let's just get the full upstream lineage but stop at "Anchor" boundaries
     // to prevent walking across the entire V-Model via bidirectional design links.
     const stopTypes = new Set([
-      'architecture_view', 'api_contract', 'data_model', 'adr', 
+      'logical_component', 'physical_component', 'functional_chain', 'api_contract', 'data_model', 'adr', 
       'test_scenario', 'reference_source', 'user_char', 'stakeholder'
     ]);
 
