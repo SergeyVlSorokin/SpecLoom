@@ -333,9 +333,11 @@ export class SpecEngine {
       if (id.startsWith('SYS-')) return NodeType.SYSTEM_REQUIREMENT;
       if (id.startsWith('SCN-')) return NodeType.TEST_SCENARIO;
       if (id.startsWith('REF-')) return NodeType.REFERENCE_SOURCE;
+      if (id.startsWith('NAV-')) return NodeType.UI_NAVIGATION_MAP;
+      if (id.startsWith('UIC-')) return NodeType.UI_COMPONENT_SPEC;
+      if (id.startsWith('VIEW-')) return NodeType.ARCHITECTURE_VIEW;
       return null;
   }
-
   public async validate() {
      const semanticReport = this.semanticValidator.validate();
      const traceReport = await this.traceValidator.validate();

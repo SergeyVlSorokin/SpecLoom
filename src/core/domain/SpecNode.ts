@@ -21,12 +21,15 @@ export enum NodeType {
   IMPLEMENTATION = 'implementation',
   VERIFICATION = 'verification',
   TEST_SCENARIO = 'test_scenario',
-  REFERENCE_SOURCE = 'reference_source'
+  REFERENCE_SOURCE = 'reference_source',
+  UI_NAVIGATION_MAP = 'ui_navigation_map',
+  UI_COMPONENT_SPEC = 'ui_component_spec',
+  ARCHITECTURE_VIEW = 'architecture_view'
 }
 
 export class SpecNode {
   public readonly hash: string;
-  private static ID_REGEX = /^[A-Z]{2,6}-[0-9]{3}$/;
+  private static ID_REGEX = /^[A-Z]{2,6}-[0-9]{3,4}$/;
   private static SYS_ID_REGEX = /^SYS-[A-Z]+$/;
 
   constructor(
