@@ -101,7 +101,8 @@ export class SemanticValidator {
         'non_functional_requirement', 
         'constraint', 
         'assumption',
-        'system_requirement'
+        'system_requirement',
+        'reference_source'
       ];
       
       if (rootTypes.includes(node.type)) {

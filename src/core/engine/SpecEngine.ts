@@ -222,6 +222,27 @@ export class SpecEngine {
                 }
             }
 
+            // Custom Arcadia extraction
+            if (content.allocated_functions) {
+                for (const func of content.allocated_functions) {
+                    if (func.traces_to) {
+                        for (const targetId of func.traces_to) {
+                            this.db.addLink(content.id, targetId, 'functional_requirements');
+                        }
+                    }
+                }
+            }
+            if (content.realizes_logical_components) {
+                for (const targetId of content.realizes_logical_components) {
+                    this.db.addLink(content.id, targetId, 'logical_components');
+                }
+            }
+            if (Array.isArray(content.traces_to)) {
+                for (const targetId of content.traces_to) {
+                    this.db.addLink(content.id, targetId, 'user_requirements');
+                }
+            }
+
             // Extract links from trace_to
             if (content.trace_to) {
                 if (Array.isArray(content.trace_to)) {
@@ -231,43 +252,11 @@ export class SpecEngine {
                         const targets = content.trace_to[key];
                         if (Array.isArray(targets)) {
                             for (const targetId of targets) {
-                                if (/^[A-Z]{2,6}-[0-9]{3,4}$/.test(targetId) || /^SYS-[A-Z]+$/.test(targetId)) {
+                                if (/^[A-Z]{2,6}-[A-Z0-9]{3,4}$/.test(targetId) || /^SYS-[A-Z]+$/.test(targetId)) {
                                     this.db.addLink(content.id, targetId, key);
                                 }
                             }
                         }
-                    }
-                }
-            }
-
-            // Custom Parsers for MBSE/Arcadia Schemas
-            // 1. Logical Components (LCOMP): allocated_functions[].traces_to
-            if (content.allocated_functions && Array.isArray(content.allocated_functions)) {
-                for (const func of content.allocated_functions) {
-                    if (func.traces_to && Array.isArray(func.traces_to)) {
-                        for (const targetId of func.traces_to) {
-                            if (/^[A-Z]{2,6}-[0-9]{3,4}$/.test(targetId) || /^SYS-[A-Z]+$/.test(targetId)) {
-                                this.db.addLink(content.id, targetId, 'allocated_functions');
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 2. Functional Chains (FCHAIN): top-level traces_to
-            if (content.traces_to && Array.isArray(content.traces_to)) {
-                for (const targetId of content.traces_to) {
-                    if (/^[A-Z]{2,6}-[0-9]{3,4}$/.test(targetId) || /^SYS-[A-Z]+$/.test(targetId)) {
-                        this.db.addLink(content.id, targetId, 'traces_to');
-                    }
-                }
-            }
-
-            // 3. Physical Components (PCOMP): realizes_logical_components
-            if (content.realizes_logical_components && Array.isArray(content.realizes_logical_components)) {
-                for (const targetId of content.realizes_logical_components) {
-                    if (/^[A-Z]{2,6}-[0-9]{3,4}$/.test(targetId) || /^SYS-[A-Z]+$/.test(targetId)) {
-                        this.db.addLink(content.id, targetId, 'realizes_logical_components');
                     }
                 }
             }

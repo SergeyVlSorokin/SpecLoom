@@ -29,7 +29,7 @@ export enum NodeType {
 
 export class SpecNode {
   public readonly hash: string;
-  private static ID_REGEX = /^[A-Z]{2,6}-[0-9]{3,4}$/;
+  private static ID_REGEX = /^[A-Z]{2,6}-[A-Z0-9]{3,4}$/;
   private static SYS_ID_REGEX = /^SYS-[A-Z]+$/;
 
   constructor(
@@ -41,7 +41,7 @@ export class SpecNode {
         type !== NodeType.VERIFICATION && 
         type !== NodeType.SYSTEM_REQUIREMENT && 
         !SpecNode.ID_REGEX.test(id)) {
-      throw new Error(`Invalid ID format: ${id}. Expected ${SpecNode.ID_REGEX}`);
+      throw new Error(`Invalid ID format: ${id}. Expected /^[A-Z]{2,6}-[A-Z0-9]{3,4}$/`);
     }
     if (type === NodeType.SYSTEM_REQUIREMENT && !SpecNode.SYS_ID_REGEX.test(id)) {
        throw new Error(`Invalid System ID format: ${id}. Expected ${SpecNode.SYS_ID_REGEX}`);
