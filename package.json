@@ -1,6 +1,6 @@
 {
   "name": "specloom",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -38,7 +38,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/treeify": "^1.0.3",
     "jest": "^30.2.0",
-    "shx": "^0.3.4",
+    "shx": "^0.4.0",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
