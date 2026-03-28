@@ -26,10 +26,12 @@ const projectRoot = dirArgIndex !== -1 && args[dirArgIndex + 1]
 const controller = new SpecController(projectRoot);
 const promptFactory = new PromptFactory();
 
+const pkg = JSON.parse(readFileSync(join(__dirname, '../../../package.json'), 'utf-8'));
+
 const server = new Server(
   {
     name: 'specloom-server',
-    version: '1.0.0',
+    version: pkg.version,
   },
   {
     capabilities: {

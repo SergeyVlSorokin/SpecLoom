@@ -2,16 +2,21 @@
 import { Command } from 'commander';
 import { createInterface } from 'readline';
 import { SpecController } from '../../core/controllers/SpecController.js';
+import { readFileSync } from 'fs';
+import { resolve, join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(join(__dirname, '../../../package.json'), 'utf-8'));
 
 const program = new Command();
 
 program
   .name('loom')
   .description('SpecLoom CLI - Spec-Driven Development Guardian')
-  .version('1.0.0')
+  .version(pkg.version)
   .option('--dir <path>', 'Override the project root directory (defaults to current working directory)');
-
-import { resolve } from 'path';
 
 // Helper to get controller with potentially overridden directory
 const getController = () => {
