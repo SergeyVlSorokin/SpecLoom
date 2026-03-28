@@ -172,6 +172,7 @@ export class SpecEngine {
     // Map to track ID -> FilePath to detect collisions
     const knownIds = new Map<string, string>();
     const foundIds = new Set<string>();
+    let hasErrors = false;
 
     for (const filePath of specFiles) {
         // Skip registry.json itself if it still exists
@@ -188,17 +189,27 @@ export class SpecEngine {
                 knownIds.set(content.id, filePath);
                 foundIds.add(content.id);
             }
-            
             // Prioritize inferred type for system consistency (e.g. TASK-XXX is always execution_task)
             const inferredType = this.inferTypeFromId(content.id);
             const type = inferredType || content.type;
 
-            if (!type) {
-                 console.warn(`Skipping file ${filePath}: Could not infer type for ID ${content.id}.`);
-                 continue;
-            }
+             if (!type) {
+                  console.warn(`Skipping file ${filePath}: Could not infer type for ID ${content.id}.`);
+                  continue;
+             }
 
-            const node = new SpecNode(content.id, type as NodeType, content);
+             // Schema Validation (TASK-Validation-Enforcement)
+             const schemaName = this.getSchemaNameForType(type as NodeType);
+             if (schemaName) {
+                 const validation = this.schemaValidator.validate(schemaName, content);
+                 if (!validation.valid) {
+                     console.error(`[Validation Error] ${filePath}: ${validation.errorSummary}`);
+                     hasErrors = true;
+                     continue; // Skip invalid artifact
+                 }
+             }
+
+             const node = new SpecNode(content.id, type as NodeType, content);
             
             // Delta Invalidation Logic (FR-041)
             let isModified = false;
@@ -261,12 +272,17 @@ export class SpecEngine {
                 }
             }
         } catch (error) {
+            hasErrors = true;
             if (error instanceof Error) {
                  console.error(`[Integrity Error] Failed to process ${basename(filePath)}: ${error.message}`);
             } else {
                  console.error(`Failed to process file ${filePath}:`, error);
             }
         }
+    }
+
+    if (hasErrors) {
+        console.warn('Sync completed with validation or integrity errors.');
     }
 
     // Phase 1.5: Prune stale nodes (Nodes in DB but not in FS, excluding Implementation/Verification)
@@ -326,6 +342,34 @@ export class SpecEngine {
       if (id.startsWith('UIC-')) return NodeType.UI_COMPONENT_SPEC;
       if (id.startsWith('VIEW-')) return NodeType.ARCHITECTURE_VIEW;
       return null;
+  }
+
+  private getSchemaNameForType(type: NodeType): string | null {
+      const mapping: Record<string, string> = {
+          [NodeType.CONTEXT]: 'product_context.schema.json',
+          [NodeType.STAKEHOLDER]: 'stakeholder.schema.json',
+          [NodeType.ASSUMPTION]: 'assumption.schema.json',
+          [NodeType.USER_CHAR]: 'user_char.schema.json',
+          [NodeType.USER_REQUIREMENT]: 'user_requirement.schema.json',
+          [NodeType.FUNCTIONAL_REQUIREMENT]: 'functional_requirement.schema.json',
+          [NodeType.NON_FUNCTIONAL_REQUIREMENT]: 'non_functional_requirement.schema.json',
+          [NodeType.CONSTRAINT]: 'constraint.schema.json',
+          [NodeType.BUSINESS_RULE]: 'business_rule.schema.json',
+          [NodeType.API_CONTRACT]: 'api_contract.schema.json',
+          [NodeType.DATA_MODEL]: 'data_model.schema.json',
+          [NodeType.ADR]: 'adr.schema.json',
+          [NodeType.LOGICAL_COMPONENT]: 'logical_component.schema.json',
+          [NodeType.PHYSICAL_COMPONENT]: 'physical_component.schema.json',
+          [NodeType.FUNCTIONAL_CHAIN]: 'functional_chain.schema.json',
+          [NodeType.EXECUTION_TASK]: 'task.schema.json',
+          [NodeType.SYSTEM_REQUIREMENT]: 'system_requirement.schema.json',
+          [NodeType.TEST_SCENARIO]: 'test_scenario.schema.json',
+          [NodeType.REFERENCE_SOURCE]: 'reference_source.schema.json',
+          [NodeType.UI_NAVIGATION_MAP]: 'ui_navigation_map.schema.json',
+          [NodeType.UI_COMPONENT_SPEC]: 'ui_component_spec.schema.json',
+          [NodeType.ARCHITECTURE_VIEW]: 'architecture_view.schema.json'
+      };
+      return mapping[type] || null;
   }
   public async validate() {
      const semanticReport = this.semanticValidator.validate();
