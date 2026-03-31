@@ -13,6 +13,7 @@ export interface ContextBundle {
   constraints: any[];
   adrs: any[];
   references: any[];
+  design_nodes: any[];
   code_files: Record<string, string>;
 }
 
@@ -35,11 +36,13 @@ export class WorkflowService {
       constraints: [],
       adrs: [],
       references: [],
+      design_nodes: [],
       code_files: {}
     };
 
     // 1. Get Traces (Upstream)
     const targets = this.db.getTraceTargets(taskId);
+    const designNodeTypes = ['logical_component', 'physical_component', 'functional_chain', 'api_contract', 'data_model', 'adr'];
     
     for (const targetId of targets) {
       const node = this.db.getNode(targetId);
@@ -49,8 +52,8 @@ export class WorkflowService {
         bundle.requirements.push(node.content);
       } else if (node.type === 'constraint') {
         bundle.constraints.push(node.content);
-      } else if (node.type === 'adr') {
-        bundle.adrs.push(node.content);
+      } else if (designNodeTypes.includes(node.type)) {
+        bundle.design_nodes.push(node.content);
       } else if (node.type === 'reference_source') {
         bundle.references.push(node.content);
       }

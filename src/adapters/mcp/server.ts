@@ -380,11 +380,10 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
                   contextData = JSON.stringify({
                       system_info: info,
                       system_status: status,
-                      project_context: productContext,
+                      product_context: productContext,
                       next_recommendation: next,
                       protocols: protocols
-                  }, null, 2);
-              } catch (e: any) {
+                  }, null, 2);              } catch (e: any) {
                   contextData = `Error initializing load context: ${e.message}`;
               }
           }

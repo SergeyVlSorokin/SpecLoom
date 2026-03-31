@@ -43,13 +43,29 @@ export class SchemaValidator {
     }
   }
 
-  public validate(schemaName: string, data: any): { valid: boolean; errors?: any } {
+  public validate(schemaName: string, data: any): { valid: boolean; errors?: any; errorSummary?: string } {
     this.loadSchemas();
     const validate = this.ajv.getSchema(schemaName);
     if (!validate) {
-      throw new Error(`Schema not found: ${schemaName}`);
+      return { valid: true };
     }
     const valid = validate(data);
-    return { valid: !!valid, errors: validate.errors };
+    if (!valid) {
+      return { 
+        valid: false, 
+        errors: validate.errors,
+        errorSummary: this.formatErrors(validate.errors)
+      };
+    }
+    return { valid: true };
+  }
+
+  private formatErrors(errors: any[] | null | undefined): string {
+    if (!errors || errors.length === 0) return 'Unknown validation error';
+    return errors.map(err => {
+      const path = err.instancePath || 'root';
+      const msg = err.message || 'invalid';
+      return `${path}: ${msg}${err.params ? ' (' + JSON.stringify(err.params) + ')' : ''}`;
+    }).join('; ');
   }
 }

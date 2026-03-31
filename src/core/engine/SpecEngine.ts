@@ -189,16 +189,15 @@ export class SpecEngine {
                 foundIds.add(content.id);
             }
             
-            // Prioritize inferred type for system consistency (e.g. TASK-XXX is always execution_task)
             const inferredType = this.inferTypeFromId(content.id);
             const type = inferredType || content.type;
 
             if (!type) {
-                 console.warn(`Skipping file ${filePath}: Could not infer type for ID ${content.id}.`);
-                 continue;
-            }
+                  console.warn(`Skipping file ${filePath}: Could not infer type for ID ${content.id}.`);
+                  continue;
+             }
 
-            const node = new SpecNode(content.id, type as NodeType, content);
+             const node = new SpecNode(content.id, type as NodeType, content);
             
             // Delta Invalidation Logic (FR-041)
             let isModified = false;
@@ -207,14 +206,11 @@ export class SpecEngine {
                     content.handshake_state = 'Modified';
                     writeFileSync(filePath, JSON.stringify(content, null, 2));
                     isModified = true;
-                    // Note: In real life, we don't want to log constantly unless verbose,
-                    // but for now, we know we changed the file state.
                 }
             }
 
             this.db.upsertNode(node);
 
-            // Handle invalidation of downstream nodes
             if (isModified || content.handshake_state === 'Modified') {
                 const impactTree = this.impactEngine.getImpact(node.id);
                 if (impactTree) {
@@ -269,26 +265,18 @@ export class SpecEngine {
         }
     }
 
-    // Phase 1.5: Prune stale nodes (Nodes in DB but not in FS, excluding Implementation/Verification)
+    // Phase 1.5: Prune stale nodes
     const allNodes = this.db.getAllNodes();
     for (const node of allNodes) {
-        // Skip nodes managed by other scanners
         if (node.type === NodeType.IMPLEMENTATION || node.type === NodeType.VERIFICATION) {
             continue;
         }
-
         if (!foundIds.has(node.id)) {
-            // console.log(`Pruning stale node: ${node.id}`);
-            // TODO: In verbose mode, log this.
-            // Also need to be careful about nodes that are NOT file-based but persistent?
-            // Currently, all non-impl/verif nodes should be file-based.
-            // Exception: Some nodes if created via API and not saved to file yet? 
-            // But system design says everything is file-based.
             this.db.deleteNode(node.id);
         }
     }
 
-    // Phase 2: Run Trace Scanner to populate Implementation nodes
+    // Phase 2: Run Trace Scanner
     this.db.deleteNodesByType(NodeType.IMPLEMENTATION);
     this.db.deleteNodesByType(NodeType.VERIFICATION);
 
@@ -327,18 +315,80 @@ export class SpecEngine {
       if (id.startsWith('VIEW-')) return NodeType.ARCHITECTURE_VIEW;
       return null;
   }
+
+  private getSchemaNameForType(type: NodeType): string | null {
+      const mapping: Record<string, string> = {
+          [NodeType.CONTEXT]: 'product_context.schema.json',
+          [NodeType.STAKEHOLDER]: 'stakeholder.schema.json',
+          [NodeType.ASSUMPTION]: 'assumption.schema.json',
+          [NodeType.USER_CHAR]: 'user_char.schema.json',
+          [NodeType.USER_REQUIREMENT]: 'user_requirement.schema.json',
+          [NodeType.FUNCTIONAL_REQUIREMENT]: 'functional_requirement.schema.json',
+          [NodeType.NON_FUNCTIONAL_REQUIREMENT]: 'non_functional_requirement.schema.json',
+          [NodeType.CONSTRAINT]: 'constraint.schema.json',
+          [NodeType.BUSINESS_RULE]: 'business_rule.schema.json',
+          [NodeType.API_CONTRACT]: 'api_contract.schema.json',
+          [NodeType.DATA_MODEL]: 'data_model.schema.json',
+          [NodeType.ADR]: 'adr.schema.json',
+          [NodeType.LOGICAL_COMPONENT]: 'logical_component.schema.json',
+          [NodeType.PHYSICAL_COMPONENT]: 'physical_component.schema.json',
+          [NodeType.FUNCTIONAL_CHAIN]: 'functional_chain.schema.json',
+          [NodeType.EXECUTION_TASK]: 'task.schema.json',
+          [NodeType.SYSTEM_REQUIREMENT]: 'system_requirement.schema.json',
+          [NodeType.TEST_SCENARIO]: 'test_scenario.schema.json',
+          [NodeType.REFERENCE_SOURCE]: 'reference_source.schema.json',
+          [NodeType.UI_NAVIGATION_MAP]: 'ui_navigation_map.schema.json',
+          [NodeType.UI_COMPONENT_SPEC]: 'ui_component_spec.schema.json',
+          [NodeType.ARCHITECTURE_VIEW]: 'architecture_view.schema.json'
+      };
+      return mapping[type] || null;
+  }
+
   public async validate() {
+    // Schema Validation
+    const specFiles = await this.scanner.scan(['.spec/data/**/*.json'], { respectIgnoreFiles: false });
+    const schemaErrors: { file: string, message: string }[] = [];
+    let hasSchemaErrors = false;
+
+    for (const filePath of specFiles) {
+        if (basename(filePath) === 'registry.json') continue;
+        try {
+            const content = JSON.parse(readFileSync(filePath, 'utf8'));
+            const inferredType = this.inferTypeFromId(content.id);
+            const type = inferredType || content.type;
+
+            if (!type) continue;
+
+            const schemaName = this.getSchemaNameForType(type as NodeType);
+            if (schemaName) {
+                const validation = this.schemaValidator.validate(schemaName, content);
+                if (!validation.valid) {
+                    hasSchemaErrors = true;
+                    schemaErrors.push({ file: filePath, message: validation.errorSummary! });
+                }
+            }
+        } catch (error) {
+            hasSchemaErrors = true;
+            if (error instanceof Error) {
+                schemaErrors.push({ file: filePath, message: error.message });
+            } else {
+                schemaErrors.push({ file: filePath, message: 'Unknown parsing error' });
+            }
+        }
+    }
+
      const semanticReport = this.semanticValidator.validate();
      const traceReport = await this.traceValidator.validate();
      
-     const status = (semanticReport.status === 'FAIL' || traceReport.status === 'FAIL') ? 'FAIL' : 'PASS';
+     const finalStatus = (hasSchemaErrors || semanticReport.status === 'FAIL' || traceReport.status === 'FAIL') ? 'FAIL' : 'PASS';
      
      // Merge reports
      const orphans = [...semanticReport.orphans, ...traceReport.orphans];
      const brokenLinks = semanticReport.brokenLinks;
 
      return {
-         status,
+         status: finalStatus,
+         schemaErrors,
          orphans,
          brokenLinks
      };

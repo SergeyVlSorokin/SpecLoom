@@ -23,6 +23,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
     *   **Decompose:** Break `FR`s into tasks (Standard Size: 1-4 hours).
     *   **Sequence:** Use `dependencies` to order tasks (Foundation -> Feature).
     *   **Trace:** Ensure every task traces to a parent `FR` or `ADR`.
+    *   **Trace to Design:** For Feature tasks, you MUST add traces to all relevant design nodes (`LCOMP`, `PCOMP`, etc.) in the `trace_to.design_nodes` field.
 
 3.  **Execution (File Creation)**
     *   **Create Files:** You MUST generate **ONE JSON file PER artifact** (`TASK-XXX.json`). (Do NOT combine).
