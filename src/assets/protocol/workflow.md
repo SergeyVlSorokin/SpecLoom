@@ -39,7 +39,7 @@ The workflow strictly follows the schema-data directory structure.
 | **2. Strategy** | `02_pivots` | `assumption` | **Risk Ack:** User accepts "Bets". |
 | **3. Intent** | `03_users` | `user_char`, `user_requirement` | **Needs Validated:** Stories mapped to Stakeholders. |
 | **4. Specification** | `04_system` | `functional_requirement`, `non_functional`, `constraint` | **Contract Signed:** Clear Acceptance Criteria. |
-| **5. Architecture** | `05_design` | `api_contract`, `data_model`, `logical_component` (4+1), `adr` | **Design Freeze:** Interface matches Specs & ADRs approved. |
+| **5. Architecture** | `05_design` | `logical_component`, `physical_component`, `functional_chain`, `api_contract`, `data_model`, `ui_navigation_map`, `ui_component_spec`, `adr` | **Design Freeze:** Interface matches Specs & ADRs approved. |
 | **6. Execution** | `06_execution` | `task`, `session` | **Implementation:** Code generation begins. |
 
 ---
@@ -76,13 +76,13 @@ Assumptions are the "Bridge over Uncertainty."
 
 Design is the bridge between Requirement and Execution. It must be approached hierarchically.
 
-### A. The "Views First" Rule
-**Priority:** You MUST define or update **Architecture Views** (`VIEW-XXX`) before defining granular APIs or Data Models.
-*   **Rational:** Views define the "Context of Change." You cannot define an API endpoint if you don't know which component owns it.
+### A. The "Functions First" Rule
+**Priority:** You MUST define **Logical Components** (`LCOMP`) and prove them with **Functional Chains** (`FCHAIN`) before allocating to **Physical Components** (`PCOMP`).
+*   **Rational:** Logical architecture defines the "What it does" independent of the "Where it runs". You cannot define an API or physical deployment if you don't know the logical responsibilities.
 *   **Workflow:**
-    1.  **Assess Views:** When satisfying an FR, ask: "Does this fit into existing `VIEW-XXX`?"
-    2.  **Modify/Create View:** If the FR introduces a new subsystem or interaction flow, update the View Diagram first.
-    3.  **Detail Design:** Only *after* the View is settled, create `API-XXX` or `DATA-XXX`.
+    1.  **Define LCOMPs:** Identify the logical blocks of responsibility needed to satisfy the `FR`s.
+    2.  **Prove with FCHAINs:** Create Functional Chains to verify that the `LCOMP`s can interact to satisfy a specific `UR` (Use Case flow).
+    3.  **Allocate to PCOMPs:** Once the logical architecture is proven, map the `LCOMP`s to Physical Components (services, databases, UI apps). Detail APIs (`API-XXX`) and Data Models (`DATA-XXX`) as interfaces between these components.
 
 ### B. The ADR Mandate (Decision Records)
 **Rule:** If you encounter a design choice with **Alternatives** (e.g., "REST vs GraphQL", "SQL vs NoSQL", "Library A vs Library B"), you **MUST** create an ADR (`ADR-XXX`).

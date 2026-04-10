@@ -43,7 +43,7 @@ SpecLoom's workflow follows a strict sequential process, enforced by directory s
 ### Stage 5: Architecture (The Structure)
 
 * **Goal:** Design the system to meet the specifications.
-* **Artifacts:** `Architecture Views`, `API Contracts`, `Data Models`, `ADRs` (Architecture Decision Records).
+* **Artifacts:** `Logical Components`, `Physical Components`, `Functional Chains`, `API Contracts`, `Data Models`, `UI Artifacts`, `ADRs`.
 * **Gate:** Design frozen and ADRs approved.
 
 ### Stage 6: Execution (The Plan)
@@ -74,9 +74,9 @@ Use assumptions to bridge uncertainty. Create an assumption ONLY if a decision i
 
 ### 3.3 The Architecture Protocol
 
-Design must be hierarchical:
+Design must be hierarchical and follow MBSE/Arcadia principles:
 
-1. **Views First:** Define high-level views before detailed APIs.
+1. **Functions First:** Define Logical Components (`LCOMP`) and prove them with Functional Chains (`FCHAIN`) before deciding on Physical Components (`PCOMP`).
 2. **ADR Mandate:** Document architectural decisions with `ADR-XXX`.
 
 ### 3.4 The Task Execution Protocol
@@ -95,5 +95,5 @@ SpecLoom tracks the identity of the operator. To prevent bias, the session that 
 
 SpecLoom acts as the "Brain" for AI agents via the **Model Context Protocol (MCP)**.
 
-* **Tools:** Agents use `loom_next`, `loom_context`, `loom_validate`, and `loom_verify`.
+* **Prompts:** Agents are guided through the V-Model via state-aware Slash Commands (e.g., `/req`, `/arch`, `/planning`, `/impl`).
 * **Context:** SpecLoom provides structured context bundles, reducing hallucination by grounding the agent in the project's reality.

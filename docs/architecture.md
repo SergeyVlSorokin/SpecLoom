@@ -87,10 +87,16 @@ graph TD
     end
 
     subgraph Layer_3_Architecture ["3. Architecture (The How)"]
-        VIEW[Architecture View] --> FR
-        API[API Contract] --> FR
-        DATA[Data Model] --> FR
+        LCOMP[Logical Component] --> FR
+        FCHAIN[Functional Chain] --> UR
+        FCHAIN -.->|Realizes| LCOMP
+        PCOMP[Physical Component] --> LCOMP
+        API[API Contract] --> FCHAIN
+        DATA[Data Model] --> LCOMP
         EXT[External Interface] --> API
+        NAV[Navigation Map] --> UR
+        UIC[UI Component] --> UR
+        UIC --> API
         
         %% ADRs can be triggered by any requirement or assumption
         ADR[Arch. Decision] --> NFR
@@ -119,13 +125,21 @@ graph TD
 | **System Req (`SYS`)** | *None (Root)* | Process Tasks |
 | **Stakeholder (`STK`)** | Product Context | BR, NFR, CON, UCH |
 | **User Char (`UCH`)** | Stakeholder | User Requirements |
-| **User Req (`UR`)** | User Char | Functional Reqs |
+| **User Req (`UR`)** | User Char | Functional Reqs, FCHAIN, NAV, UIC |
 | **Business Rule (`BR`)** | Stakeholder | Functional Reqs |
 | **Constraint (`CON`)** | Stakeholder | Functional Reqs, ADRs |
 | **Non-Functional (`NFR`)** | Stakeholder | Functional Reqs, ADRs |
 | **Assumption (`ASM`)** | *None (Root)* | FRs, ADRs |
-| **Functional Req (`FR`)** | UR, BR, NFR, CON, ASM | Architecture, Tasks, Code, Tests |
-| **ADR** | FR, NFR, CON, ASM | Tasks, Architecture Views |
+| **Functional Req (`FR`)** | UR, BR, NFR, CON, ASM | LCOMP, Tasks, Code, Tests |
+| **Logical Component (`LCOMP`)** | FR | PCOMP, FCHAIN, DATA |
+| **Physical Component (`PCOMP`)** | LCOMP | Tasks |
+| **Functional Chain (`FCHAIN`)** | UR, LCOMP | API |
+| **API Contract (`API`)** | FCHAIN | EXT, UIC |
+| **Data Model (`DATA`)** | LCOMP | Tasks |
+| **Navigation Map (`NAV`)** | UR | Tasks |
+| **UI Component (`UIC`)** | UR, API | Tasks |
+| **External Interface (`EXT`)**| API | Tasks |
+| **ADR** | FR, NFR, CON, ASM | Tasks, LCOMP/PCOMP |
 | **Execution Task** | FR, ADR, SYS | Sessions, Code Changes |
 
 ## 4. Key Subsystems

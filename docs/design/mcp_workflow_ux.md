@@ -35,21 +35,27 @@ We define **10 Standard Prompts** that cover the entire V-Model lifecycle.
 
 | Command | Phase | Role | Dynamic Logic (State-Aware) |
 | :--- | :--- | :--- | :--- |
-| **`/init`** | 1 (Context) | Product Manager | Checks if `product_context` exists. If missing, guides user to define Scope & Stakeholders. If present, shows summary. |
-| **`/req`** | 2-4 (Spec) | Business Analyst | Checks `UCH` coverage. Maps `UR` -> `FR`. Identifies Orphans. Enforces "Problem before Solution." |
-| **`/arch`** | 5 (Design) | System Architect | Checks `FR` coverage. Enforces "Views First" rule. Mandates `ADR` for decision points. |
-| **`/plan`** | 6a (Planning) | Technical Lead | Breaks `FR`/`ADR` into `TASK`s. Checks dependencies. Enforces `Definition of Done` and `Traceability`. |
-| **`/impl`** | 6b (Execution) | Lead Developer | Reads `loom next` (Active/Next Task). Ingests the **Context Bundle** for that task. Returns "Coding Agent" instructions. |
-| **`/verify`** | 6c (Quality) | QA Engineer | Reviews implementation against `FR`/`ADR`. Generates `SCN` (Scenarios). Handles **Defect Tasks**. |
+| **`/load`** | 0 (Bootstrap) | System Bootstrapper | Assesses environment, orients user, proposes next step. |
+| **`/init`** | 1 (Context) | Product Manager | Checks if `product_context` exists. If missing, guides user to define Scope. |
+| **`/vision`** | 1 (Vision) | Product Owner/Analyst | Shapes initial system vision and defines high-level product goals. |
+| **`/req`** | 2-4 (Spec) | Business Analyst | Checks `UCH` coverage. Maps `UR` -> `FR`. Enforces "Problem before Solution." |
+| **`/handshake`** | All (Governance) | Governance Facilitator | Facilitates formal agreements to resolve 'Modified' states and lock anchors. |
+| **`/arch`** | 5 (Design) | System Architect | Checks `FR` coverage. Enforces "Functions First" rule. Mandates `ADR`. |
+| **`/planning`** | 6a (Planning) | Technical Lead | Breaks `FR`/`ADR` into `TASK`s. Checks dependencies. Enforces Traceability. |
+| **`/prioritize`** | 6a (Planning) | Product Owner Assistant | Helps manage and prioritize the execution task backlog to deliver value. |
+| **`/impl`** | 6b (Execution) | Lead Developer | Reads `loom next`. Ingests Context Bundle. Returns "Coding Agent" instructions. |
+| **`/verify`** | 6c (Quality) | QA Engineer | Reviews against `FR`/`ADR`. Generates `SCN`. Handles Defect Tasks. |
 
-### B. Utility Accessors (Direct Retrieval)
+### B. Utility Accessors (Direct Retrieval & Execution)
 
 | Command | Purpose | Output Content |
 | :--- | :--- | :--- |
-| **`/context [ID]`** | Data Fetch | Returns the full JSON content + Up/Down traces for the requested IDs. |
+| **`/context [ID]`** | Data Fetch | Returns the full JSON content + Up/Down traces for requested IDs. |
 | **`/status`** | Health Check | Runs `loom status`. Returns "Phase: X. Open Tasks: Y. Gaps: Z." |
-| **`/info`** | System Meta | Returns SpecLoom Manual, Master Protocols, and Agent Operating Instructions. |
-| **`/project`** | Project Meta | Summarizes `product_context`, `stakeholders`, and high-level `BR`s (The "Project Knowledge"). |
+| **`/info`** | System Meta | Returns SpecLoom Manual, Master Protocols, and Agent Instructions. |
+| **`/project`** | Project Meta | Summarizes `product_context`, `stakeholders`, and high-level `BR`s. |
+| **`/next`** | Task Navigation | Helps the user identify and select the next actionable task. |
+| **`/review`** | Code Review | Reviews completed tasks against requirements enforcing Four-Eyes Principle. |
 
 ---
 

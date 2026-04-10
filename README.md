@@ -57,12 +57,16 @@ Add SpecLoom to your agent's settings:
 }
 ```
 
-### Available Tools
+### Available Prompts (Slash Commands)
 
-* **`loom_next`:** Asks "What should I work on?" (Project Manager)
-* **`loom_context`:** Asks "Give me the specs and code for this task." (Librarian)
-* **`loom_validate`:** Asks "Did I break anything?" (QA)
-* **`loom_verify`:** Asks "Does the code meet the requirements?" (Tester)
+SpecLoom provides a suite of state-aware slash commands to guide the AI through the V-Model:
+
+* **`/load`:** Assesses environment, orients user, proposes next step.
+* **`/vision` & `/req`:** Defines product scope and requirements.
+* **`/arch`:** Defines Logical and Physical components.
+* **`/planning`:** Breaks requirements into execution tasks.
+* **`/impl`:** Ingests context and implements code.
+* **`/verify`:** Reviews implementation against requirements.
 
 ---
 
