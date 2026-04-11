@@ -19,6 +19,7 @@
     },
     "realizes_logical_components": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "string",
         "pattern": "^LCOMP-[0-9]{3}$"
@@ -45,6 +46,7 @@
     },
     "physical_ports": {
       "type": "array",
+      "minItems": 1,
       "description": "Specific connection points like network sockets, chip pins, or internal bus connectors.",
       "items": {
         "type": "object",
@@ -73,6 +75,7 @@
     },
     "technical_interfaces": {
       "type": "array",
+      "minItems": 1,
       "description": "The precise protocols and contracts governing communication.",
       "items": {
         "type": "object",

@@ -71,6 +71,7 @@
     },
     "definition_of_done": {
       "type": "array",
+      "minItems": 1,
       "items": { "type": "string" }
     },
     "status": {
