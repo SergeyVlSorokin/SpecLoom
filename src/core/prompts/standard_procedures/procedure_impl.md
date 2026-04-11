@@ -17,7 +17,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 1.  **Ingest Context (MANDATORY)**
     *   You MUST run `loom start <task_id>` to lock the context.
     *   You MUST run `loom context <task_id>` to load the specification bundle.
-    *   You MUST read the `trace_to` artifacts (FRs, ADRs, View Diagrams) to understand the intent.
+    *   You MUST read the `trace_to` artifacts (FRs, ADRs, Design Artifacts) to understand the intent.
 
 2.  **Execution Loop (TDD Cycle)**
     *   **Red:** Create a failing test case (`tests/`).

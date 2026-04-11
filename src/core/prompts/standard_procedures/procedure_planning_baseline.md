@@ -13,8 +13,8 @@ Create `execution_task` (TASK) artifacts that guide the implementation phase.
 
 2.  **Foundation First Strategy:**
     *   **Constraint:** You MUST plan the **Implementation Foundation** before scheduling any Feature Tasks.
-    *   **Development Foundation:** Tasks to initialize the project structure (as defined in the **Development View**). e.g., "Initialize Repo", "Setup Build System", "Create Directory Layout".
-    *   **Physical Foundation:** Tasks to set up the runtime environment (as defined in the **Physical View**). e.g., "Create Dockerfile", "Setup DB Container".
+    *   **Development Foundation:** Tasks to initialize the project structure (as defined in the **Logical Architecture**). e.g., "Initialize Repo", "Setup Build System", "Create Directory Layout".
+    *   **Physical Foundation:** Tasks to set up the runtime environment (as defined in the **Physical Architecture**). e.g., "Create Dockerfile", "Setup DB Container".
 
 3.  **Decomposition:**
     *   Break down `FR`s and `ADR`s into manageable Tasks.

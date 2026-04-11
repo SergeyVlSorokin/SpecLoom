@@ -18,6 +18,10 @@
       "properties": {
         "functional_requirements": { "type": "array", "items": { "type": "string" } }
       }
+    },
+    "status": {
+      "enum": ["Proposed", "Active"],
+      "default": "Proposed"
     }
   },
   "required": ["id", "specification", "trace_to"]

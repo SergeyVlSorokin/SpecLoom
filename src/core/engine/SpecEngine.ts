@@ -312,7 +312,7 @@ export class SpecEngine {
       if (id.startsWith('REF-')) return NodeType.REFERENCE_SOURCE;
       if (id.startsWith('NAV-')) return NodeType.UI_NAVIGATION_MAP;
       if (id.startsWith('UIC-')) return NodeType.UI_COMPONENT_SPEC;
-      if (id.startsWith('VIEW-')) return NodeType.ARCHITECTURE_VIEW;
+
       return null;
   }
 
@@ -339,7 +339,7 @@ export class SpecEngine {
           [NodeType.REFERENCE_SOURCE]: 'reference_source.schema.json',
           [NodeType.UI_NAVIGATION_MAP]: 'ui_navigation_map.schema.json',
           [NodeType.UI_COMPONENT_SPEC]: 'ui_component_spec.schema.json',
-          [NodeType.ARCHITECTURE_VIEW]: 'architecture_view.schema.json'
+
       };
       return mapping[type] || null;
   }

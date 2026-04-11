@@ -25,7 +25,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
     *   **Logical Architecture (LCOMP) Checklist:**
         1. Are all System Functions (`FR`s) allocated to a Logical Component?
         2. Are the components highly cohesive (grouping related functions)?
-        3. Is this view completely agnostic of deployment technology?
+        3. Is this component completely agnostic of deployment technology?
     *   **Functional Chain (FCHAIN) Checklist:**
         1. Can you map the exact chronological sequence of functions to satisfy User Requirements and Scenarios (`UR` and `SCN`)?
         2. **Crucial Guardrail:** Does the sequence use *only* the functions defined inside the existing `LCOMP`s? If no, update the Logical Components.

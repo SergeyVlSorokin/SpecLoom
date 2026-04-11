@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Functional Chain (FC)",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^FCHAIN-[0-9]{3}$" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "level": {
+      "enum": ["logical", "physical"],
+      "description": "The abstraction level of the chain: 'logical' for LCOMPs or 'physical' for PCOMPs."
+    },
+    "traces_to": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^UR-[0-9]{3}$" },
+      "description": "The Use Case this chain realizes."
+    },
+    "sequence": {
+      "type": "array",
+      "description": "The strict chronological order of function execution.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": { "type": "integer" },
+          "actor_or_component": { "type": "string", "description": "e.g., LCOMP-001 or 'User'" },
+          "action": { "type": "string" },
+          "target_function": { "type": "string", "description": "e.g., LCOMP-002.LF-01" },
+          "payload": { "type": "string", "description": "What data is passed in this step." }
+        },
+        "required": ["step", "actor_or_component", "action", "target_function"]
+      }
+    },
+    "sequence_diagram_mermaid": {
+      "type": "string",
+      "description": "A big text attribute containing the actual sequence diagram in Mermaid notation."
+    },
+    "handshake_state": {"enum": ["Draft", "Agreed", "Modified"], "default": "Draft"},
+    "last_agreed_hash": {"type": "string"}
+  },
+  "required": ["id", "name", "level", "traces_to", "sequence"]
+}

@@ -124,7 +124,7 @@ export class SemanticValidator {
           }
 
           // Check for Hollow Requirements (No Design Trace) - TASK-040 & TASK-085
-          // We check if any incoming edge is from a Design node (API, VIEW, DATA, ADR, execution_task)
+          // We check if any incoming edge is from a Design node (API, DATA, ADR, execution_task)
           const children = this.db.getTraceSources(id);
           const childNodes = children.map(cid => this.db.getNode(cid));
           const hasDesignTrace = childNodes.some(c => 

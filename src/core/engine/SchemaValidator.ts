@@ -29,15 +29,19 @@ export class SchemaValidator {
       if (statSync(fullPath).isDirectory()) {
         this.loadSchemasRecursive(fullPath);
       } else if (item.endsWith('.schema.json')) {
-        const content = readFileSync(fullPath, 'utf8').trim();
-        if (!content) {
-          continue;
-        }
-        const schema = JSON.parse(content);
-        if (schema.$id) {
-            this.ajv.addSchema(schema);
-        } else {
-            this.ajv.addSchema(schema, item);
+        try {
+          const content = readFileSync(fullPath, 'utf8').trim();
+          if (!content) {
+            continue;
+          }
+          const schema = JSON.parse(content);
+          if (schema.$id) {
+              this.ajv.addSchema(schema);
+          } else {
+              this.ajv.addSchema(schema, item);
+          }
+        } catch (e) {
+            console.error(`[SchemaValidator] CRITICAL: Failed to load or compile schema ${item}.`, e);
         }
       }
     }
@@ -47,7 +51,7 @@ export class SchemaValidator {
     this.loadSchemas();
     const validate = this.ajv.getSchema(schemaName);
     if (!validate) {
-      return { valid: true };
+      throw new Error(`[SchemaValidator] Schema not found: ${schemaName}. This is a critical error. Check for schema loading issues.`);
     }
     const valid = validate(data);
     if (!valid) {

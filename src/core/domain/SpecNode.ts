@@ -24,7 +24,7 @@ export enum NodeType {
   REFERENCE_SOURCE = 'reference_source',
   UI_NAVIGATION_MAP = 'ui_navigation_map',
   UI_COMPONENT_SPEC = 'ui_component_spec',
-  ARCHITECTURE_VIEW = 'architecture_view'
+
 }
 
 export class SpecNode {

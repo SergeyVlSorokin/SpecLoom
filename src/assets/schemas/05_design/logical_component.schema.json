@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Logical Component (MBSE)",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^LCOMP-[0-9]{3}$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "High-level summary of the component's role and purpose."
+    },
+    "is_data_store": {
+      "type": "boolean",
+      "description": "True if this component primarily represents a shared data store (e.g., a database, a cache, a state repository).",
+      "default": false
+    },
+    "boundary_definition": {
+      "type": "object",
+      "description": "Defines what is inside versus outside the component, clarifying its scope and dependencies.",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "A narrative description of the component's boundary."
+        },
+        "external_dependencies": {
+          "type": "array",
+          "description": "A list of external systems or components this LCOMP depends on that are not described elsewhere as LCOMPs.",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["summary"]
+    },
+    "allocated_functions": {
+      "type": "array",
+      "description": "The set of behaviors and logic the component is responsible for (what it does internally).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "func_id": { "type": "string", "description": "e.g., LF-01" },
+          "name": { "type": "string", "description": "e.g., Calculate Sales Tax" },
+          "description": { "type": "string" },
+          "traces_to": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^(FR|NFR|BR)-[0-9]{3}$" },
+            "description": "The specific requirements this function satisfies."
+          }
+        },
+        "required": ["func_id", "name", "traces_to"]
+      }
+    },
+    "logical_ports": {
+      "type": "array",
+      "description": "Logical interaction points for communication with the outside world.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "port_id": { "type": "string", "description": "e.g., LP-01" },
+          "name": { "type": "string", "description": "e.g., UserDataIngest" },
+          "nature": {
+            "enum": ["REST-API", "gRPC", "Message-Queue", "Database-Connector", "Event-Stream", "Other"],
+            "description": "The technological nature of the communication channel."
+          }
+        },
+        "required": ["port_id", "name", "nature"]
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "description": "The contracts defining what is exchanged across logical ports.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "interface_id": { "type": "string", "description": "e.g., LI-01" },
+          "name": { "type": "string", "description": "e.g., GetUserProfile" },
+          "port_id": { "type": "string", "description": "The logical port this interface is exposed on." },
+          "direction": { "enum": ["Provided", "Required"] },
+          "input": {
+            "type": "array",
+            "description": "The list of input parameters for the interface.",
+            "items": { 
+              "type": "object",
+              "properties": {
+                "param": {"type": "string"}, 
+                "type": {"type": "string"},
+                "description": {"type": "string"}
+              },
+              "required": ["param", "type"]
+            }
+          },
+          "output": {
+            "type": "array",
+            "description": "The list of output attributes from the interface.",
+            "items": { 
+              "type": "object",
+              "properties": {
+                "attribute": {"type": "string"}, 
+                "type": {"type": "string"},
+                "description": {"type": "string"}
+              },
+              "required": ["attribute", "type"]
+            }
+          }
+        },
+        "required": ["interface_id", "name", "port_id", "direction"]
+      }
+    },
+    "subcomponents": {
+      "type": "array",
+      "description": "[RARE] A breakdown of internal complexity. Only for highly complex components.",
+      "items": {
+        "type": "string",
+        "pattern": "^LCOMP-[0-9]{3}$"
+      }
+    },
+    "functional_exchanges": {
+      "type": "array",
+      "description": "Describes how functions communicate across component boundaries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_function": { "type": "string", "description": "e.g., LF-01 (from this component)"},
+          "target_component": { "type": "string", "pattern": "^LCOMP-[0-9]{3}$" },
+          "target_function": { "type": "string", "description": "e.g., LF-05 (in target component)"},
+          "interface_id": { "type": "string", "description": "The interface used for this exchange."}
+        },
+        "required": ["source_function", "target_component", "interface_id"]
+      }
+    },
+    "rationale_and_constraints": {
+      "type": "object",
+      "description": "Explanation for the component's existence and its non-functional constraints.",
+      "properties": {
+        "rationale": {
+          "type": "string",
+          "description": "Why this component exists. e.g., 'To isolate safety-critical logic.'"
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Logical properties and constraints, linking to NFRs.",
+          "items": { "type": "string", "pattern": "^NFR-[0-9]{3}$" }
+        }
+      }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "boundary_definition",
+    "allocated_functions",
+    "logical_ports",
+    "interfaces"
+  ]
+}

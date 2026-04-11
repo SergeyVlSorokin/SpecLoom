@@ -294,16 +294,21 @@ program
       } else {
         console.log('--- Validation Report ---');
         console.log(`Status: ${report.status}`);
+        console.log(`Schema Errors: ${report.schemaErrors.length}`);
         console.log(`Orphans: ${report.orphans.length}`);
         console.log(`Broken Links: ${report.brokenLinks.length}`);
         
         if (report.status === 'FAIL') {
+          if (report.schemaErrors.length > 0) {
+            console.log('\n>>> Schema Errors <<<');
+            report.schemaErrors.forEach(err => console.log(`  - ${err.file}: ${err.message}`));
+          }
           if (report.orphans.length > 0) {
-            console.log('\nOrphans:');
+            console.log('\n>>> Orphans <<<');
             report.orphans.forEach(id => console.log(`  - ${id}`));
           }
           if (report.brokenLinks.length > 0) {
-            console.log('\nBroken Links:');
+            console.log('\n>>> Broken Links <<<');
             report.brokenLinks.forEach(link => console.log(`  - ${link}`));
           }
           process.exit(1);

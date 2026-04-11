@@ -28,7 +28,7 @@
         "design_nodes": { 
             "type": "array", 
             "items": { "type": "string" },
-            "description": "IDs of architectural components (VIEW-*, API-*, DATA-*) that implement this FR. MANDATORY for Design phase." 
+            "description": "IDs of architectural components (LCOMP-*, PCOMP-*, API-*, DATA-*) that implement this FR. MANDATORY for Design phase." 
         },
         "verification_plans": {
              "type": "array",
@@ -54,7 +54,7 @@
       "description": "Used to signal to the agent if the requirement is ready for implementation."
     },
     "status": {
-      "enum": ["Proposed", "Active"],
+      "enum": ["Proposed", "Active", "Deprecated"],
       "default": "Proposed"
     }
   },

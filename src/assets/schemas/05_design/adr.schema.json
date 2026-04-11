@@ -45,7 +45,7 @@
         "affected_design_nodes": { 
             "type": "array", 
             "items": { "type": "string" },
-            "description": "Links to VIEW-XXX, API-XXX, or DATA-XXX nodes."
+            "description": "Links to LCOMP-XXX, PCOMP-XXX, API-XXX, or DATA-XXX nodes."
         }
       },
       "required": ["stakeholders"]

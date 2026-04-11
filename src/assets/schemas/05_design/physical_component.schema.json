@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Physical Component (PA)",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^PCOMP-[0-9]{3}$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "pcomp_type": {
+      "enum": ["Node", "Behavioral"],
+      "description": "Node for physical hosts (servers, sensors), Behavioral for the software/logic running on them."
+    },
+    "realizes_logical_components": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^LCOMP-[0-9]{3}$"
+      },
+      "description": "The logical components that are deployed on or realized by this physical component."
+    },
+    "allocated_functions": {
+      "type": "array",
+      "description": "[Optional] The set of inherent behaviors and logic this physical component is responsible for.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "func_id": { "type": "string", "description": "e.g., PF-01" },
+          "name": { "type": "string", "description": "e.g., Encrypt Onboard Storage" },
+          "description": { "type": "string" },
+          "traces_to": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^(FR|NFR|BR)-[0-9]{3}$" },
+            "description": "The specific requirements this function satisfies."
+          }
+        },
+        "required": ["func_id", "name", "traces_to"]
+      }
+    },
+    "physical_ports": {
+      "type": "array",
+      "description": "Specific connection points like network sockets, chip pins, or internal bus connectors.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "port_id": { "type": "string", "description": "e.g., PPORT-01" },
+          "name": { "type": "string", "description": "e.g., eth0, CAN_TX" },
+          "direction": { "enum": ["In", "Out", "InOut"] }
+        },
+        "required": ["port_id", "name"]
+      }
+    },
+    "physical_links": {
+      "type": "array",
+      "description": "The medium connecting physical ports.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "link_id": { "type": "string" },
+          "source_port": { "type": "string", "description": "ID of the source port on this component." },
+          "target_component": { "type": "string", "pattern": "^PCOMP-[0-9]{3}$" },
+          "target_port": { "type": "string", "description": "ID of the target port on the other component." },
+          "medium": { "type": "string", "description": "e.g., CAN Bus, Ethernet, PCIe, Internal Memory Bus" }
+        },
+        "required": ["link_id", "source_port", "target_component", "target_port", "medium"]
+      }
+    },
+    "technical_interfaces": {
+      "type": "array",
+      "description": "The precise protocols and contracts governing communication.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "e.g., User Service API" },
+          "description": { "type": "string", "description": "A summary of what this interface does and why it's used here." },
+          "api_contract_id": {
+            "type": "string",
+            "pattern": "^API-[0-9]{3}$",
+            "description": "Link to the formal API contract artifact."
+          },
+          "port_id": { "type": "string", "description": "The physical port this interface is exposed on." }
+        },
+        "required": ["name", "description", "api_contract_id", "port_id"]
+      }
+    },
+    "handshake_state": {
+      "enum": ["Draft", "Agreed", "Modified"],
+      "default": "Draft"
+    },
+    "last_agreed_hash": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "pcomp_type",
+    "realizes_logical_components",
+    "physical_ports",
+    "technical_interfaces"
+  ]
+}
