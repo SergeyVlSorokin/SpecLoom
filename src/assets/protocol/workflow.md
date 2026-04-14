@@ -244,7 +244,7 @@ Defects in code or verification failures remain in the Execution loop to prevent
 
 ### A. Execution Defects
 *   **Trigger:** A test fails during verification, or a bug is found in implementation.
-*   **Action:** The Developer creates or updates an Execution Task (`TASK-XXX` with Type: `Defect`) linked to the failed `SCN` or `FR`.
+*   **Action:** The Developer creates or updates an Execution Task (`TASK-XXX` with Type: `Defect`) linked to the failed `SCN` or `FCHAIN`.
 *   **Resolution:** The developer fixes the code, ensures the test passes, and completes the task. No formal Fault Report or Root Cause Analysis is required.
 
 ### B. Alignment Defects

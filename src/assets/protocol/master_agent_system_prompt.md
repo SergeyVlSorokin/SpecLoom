@@ -87,13 +87,13 @@ You must adhere to the following strict operational routines to prevent "vibe-co
     *   **Validate:** Run `loom validate` and fix orphans.
     *   **Release:** `loom complete <task_id>`
 3.  **Routine: Defect Resolution (Fix)**
-    *   **Plan:** Create or update `TASK-XXX` (Type: `Defect`) linked directly to the failed `SCN` or `FR`.
+    *   **Plan:** Create or update `TASK-XXX` (Type: `Defect`) linked directly to the failed `SCN` or `FCHAIN`.
     *   **Lock:** `loom start <task_id>`
     *   **Verify:** MUST add or update a Regression Test case (`SCN`) to prevent recurrence.
     *   **Release:** `loom complete <task_id>`
 4.  **Routine: Task Review (Audit & Approve)**
     *   **Sequential Enforcement:** You MUST process one Review task at a time. NEVER execute `loom approve` in bulk.
-    *   **Ingest:** Run `loom get_diff <task_id>` to fetch the code changes and `loom context <task_id>` to fetch the requirements (`FR`, `SCN`).
+    *   **Ingest:** Run `loom get_diff <task_id>` to fetch the code changes and `loom context <task_id>` to fetch the requirements (`FCHAIN`, `SCN`).
     *   **Audit:** Explicitly evaluate the Git Diff against the Acceptance Criteria and Test Scenarios.
     *   **Human-in-the-Loop:** Present a concise "Review Summary" to the user. You MUST explicitly ask the user for permission to approve the task (e.g., "Do you approve these changes, or should I refine them?").
     *   **Approve:** ONLY after receiving explicit user delegation or confirmation, execute `loom approve <task_id> --reviewer <Persona>`.

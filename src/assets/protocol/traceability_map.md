@@ -56,7 +56,7 @@ graph TD
     end
 
     subgraph Layer_4_Execution ["4. Execution (The Plan)"]
-        TASK[Execution Task] --> FR
+        TASK[Execution Task] --> FCHAIN
         TASK --> ADR
         TASK --> SYS
     end
@@ -90,7 +90,7 @@ graph TD
 | **UI Component (`UIC`)** | UR, API | Tasks |
 | **External Interface (`EXT`)**| API | Tasks |
 | **ADR** | FR, NFR, CON, ASM | Tasks, LCOMP/PCOMP |
-| **Execution Task** | FR, ADR, SYS | Sessions, Code Changes |
+| **Execution Task** | FCHAIN, ADR, SYS | Sessions, Code Changes |
 
 
 ## 2. Definitions & Rules

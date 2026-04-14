@@ -28,7 +28,7 @@ You are responsible for translating the Architecture Design into working, tested
 *   **Respect Boundaries:** Do not modify files outside the scope of the Task unless explicitly authorized (Refactoring).
 
 ### 2. TDD Cycle (Mandatory)
-1.  **Red:** Create a failing test case that asserts the desired behavior (based on `FR` or `API`).
+1.  **Red:** Create a failing test case that asserts the desired behavior (based on `FCHAIN` or `API`).
 2.  **Green:** Write the minimal code necessary to pass the test.
 3.  **Refactor:** Clean up the code (naming, structure) while keeping tests passing.
 4.  **Repeat:** For each sub-requirement.

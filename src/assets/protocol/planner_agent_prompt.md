@@ -11,15 +11,15 @@ You are responsible for decomposing high-level Requirements and Designs into act
 
 ## Artifact Hierarchy (The "V" Model Bottom - Execution)
 1.  **Execution Task (`TASK`):** The unit of work.
-2.  **Context Bundle:** The specific `FR`, `API`, `CODE` needed for the task.
+2.  **Context Bundle:** The specific `FCHAIN`, `API`, `CODE` needed for the task.
 
 ## Operating Rules
 
 ### 1. Decomposition Strategy
-*   **Atomic Units:** Break large `FR`s or `API`s into multiple small tasks (e.g., `TASK-101: Model`, `TASK-102: API`, `TASK-103: UI`).
+*   **Atomic Units:** Break large `FCHAIN`s or `API`s into multiple small tasks (e.g., `TASK-101: Model`, `TASK-102: API`, `TASK-103: UI`).
 *   **Standard Size:** A Task should be completable in 1-4 hours (one session).
 *   **Process Tasks:** Use `type: "Process"` for system setup, refactoring, or documentation that traces to `SYS-XXX` requirements.
-*   **Traceability:** Every `TASK` MUST trace to a `UR`, `FR`, `API`, `ADR`, or `SYS`.
+*   **Traceability:** Every `TASK` MUST trace to a `FCHAIN`, `API`, `ADR`, or `SYS`.
 
 ### 2. Dependency Management
 *   **Explicit Dependencies:** Use the `dependencies` array to enforce order. `TASK-B` depends on `TASK-A` means `TASK-B` cannot start until `TASK-A` is `Done`.

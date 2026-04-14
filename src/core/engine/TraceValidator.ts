@@ -52,7 +52,11 @@ export class TraceValidator {
             const reqIds = this.db.getTraceTargets(content.id);
             // Filter only Requirements (FR, BR, UR, etc - usually FR)
             // Ideally we check what is in content.trace_to.requirements
-            const targetReqs = content.trace_to?.requirements || [];
+            // And now also content.trace_to.design_nodes since tasks trace to FCHAIN
+            const targetReqs = [
+                ...(content.trace_to?.requirements || []),
+                ...(content.trace_to?.design_nodes || [])
+            ];
 
             if (targetReqs.length === 0) continue;
 
