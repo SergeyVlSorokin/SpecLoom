@@ -16,8 +16,8 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "loom": "./dist/adapters/cli/index.js",
-    "loom-server": "./dist/adapters/mcp/server.js"
+    "loom": "dist/adapters/cli/index.js",
+    "loom-server": "dist/adapters/mcp/server.js"
   },
   "files": [
     "dist",
